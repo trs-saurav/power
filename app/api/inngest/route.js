@@ -4,7 +4,7 @@ import {
   syncUserCreation,
   syncUserUpdate,
   syncUserDeletion,
-} from "@/config/inngest/functions"; // Adjust path if needed
+} from "@/config/inngest"; // Adjust path if needed
 
 export const { GET, POST ,PUT } = serve({
   client: inngest,
