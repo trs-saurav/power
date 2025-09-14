@@ -1,4 +1,5 @@
-import { Inngest, fn } from "inngest";
+import { Inngest } from "inngest";
+import { fn } from "inngest/next";
 import connectDB from "./db";
 import User from "@/models/user";
 
@@ -6,7 +7,7 @@ import User from "@/models/user";
 export const inngest = new Inngest({ id: "power-electronics" });
 
 // Function: Create User
-export const syncUserCreation = fn(
+export const syncUserCreation = (
   "sync-user-from-clerk",
   { event: "clerk/user.created" },
   async ({ event }) => {
