@@ -1,6 +1,9 @@
 import { serve, fn } from "inngest";
 import connectDB from "./db";
 import User from "@/models/user"; // Ensure this import exists
+import { Inngest } from "inngest";
+
+export const inngest = new Inngest({ id: "power-electronics" });
 
 // Function: Create User
 const syncUserCreation = fn(
