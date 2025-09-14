@@ -1,12 +1,12 @@
 import { serve } from "inngest/next";
+import { inngest } from "@/config/inngest"; // This should export the Inngest client instance
 import {
-  inngest,
   syncUserCreation,
   syncUserUpdate,
   syncUserDeletion,
-} from "@/config/inngest";
+} from "@/config/inngest/functions"; // Adjust path if needed
 
-export const { GET, POST , PUT } = serve({
+export const { GET, POST ,PUT } = serve({
   client: inngest,
   functions: [
     syncUserCreation,

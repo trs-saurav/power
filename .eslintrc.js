@@ -1,6 +1,5 @@
 module.exports = {
   root: true,
-  parser: "babel-eslint", // Use this for JavaScript
   extends: [
     "next",
     "next/core-web-vitals"
@@ -10,6 +9,6 @@ module.exports = {
     sourceType: "module"
   },
   rules: {
-    // Add custom rules if needed
+    // Add custom rules here if needed
   }
 };
