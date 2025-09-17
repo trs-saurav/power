@@ -5,22 +5,58 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const Orders = () => {
 
-    const { currency } = useAppContext();
+    const { currency , getToken, user } = useAppContext();
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchSellerOrders = async () => {
-        setOrders(orderDummyData);
+    try {
+        setLoading(true); // Set loading to true at the start
+        
+        const token = await getToken();
+        const { data } = await axios.get('/api/order/seller-orders', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (data.success) {
+            setOrders(data.orders);
+        } else {
+            toast.error(data.message || "Failed to fetch orders");
+        }
+        
+    } catch (error) {
+        console.error('Fetch seller orders error:', error);
+        
+        if (error.response) {
+            // Server responded with error status
+            toast.error(error.response.data?.message || `Error: ${error.response.status}`);
+        } else if (error.request) {
+            // Request made but no response
+            toast.error("Network error. Please check your connection.");
+        } else {
+            // Something else happened
+            toast.error(error.message || "An unexpected error occurred");
+        }
+    } finally {
+        // Always set loading to false, regardless of success or failure
         setLoading(false);
     }
+};
 
+    
     useEffect(() => {
-        fetchSellerOrders();
-    }, []);
+        if (user){
+             fetchSellerOrders();
+        }
+    }, [user]);
 
     return (
         <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
@@ -37,7 +73,7 @@ const Orders = () => {
                                 />
                                 <p className="flex flex-col gap-3">
                                     <span className="font-medium">
-                                        {order.items.map((item) => item.product.name + ` x ${item.quantity}`).join(", ")}
+                                        {order.items.map((item) => item.productId.name + ` x ${item.quantity}`).join(", ")}
                                     </span>
                                     <span>Items : {order.items.length}</span>
                                 </p>

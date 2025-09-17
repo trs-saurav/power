@@ -40,9 +40,70 @@ const OrderSummary = () => {
     setIsDropdownOpen(false);
   };
 
-  const createOrder = async () => {
+const createOrder = async () => {
+  try {
+    if (!selectedAddress) {
+      return toast.error("Please select an address");
+    }
 
+    // Fix: Use 'productId' instead of 'product' to match backend
+    let cartItemArray = Object.keys(cartItems).map((key) => ({
+      productId: key,  // ✅ Changed from 'product' to 'productId'
+      quantity: cartItems[key]
+    }));
+
+    cartItemArray = cartItemArray.filter(item => item.quantity > 0);
+
+    if (cartItemArray.length === 0) {
+      return toast.error("Your cart is empty");
+    }
+
+    // Enhanced error handling for the request
+    const response = await axios.post('/api/order/create', {
+      items: cartItemArray,
+      address: selectedAddress._id
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const { data } = response;
+
+    if (data.success) {
+      toast.success(data.message);
+      setCartItems({});
+      router.push('/order-placed');
+    } else {
+      toast.error(data.message || "Failed to create order");
+    }
+
+  } catch (error) {
+    console.error('Order creation error:', error);
+    
+    // Better error handling for different error types
+    if (error.response) {
+      // Server responded with error status
+      const errorMessage = error.response.data?.message || 
+                          error.response.data?.error || 
+                          `Server error: ${error.response.status}`;
+      toast.error(errorMessage);
+      console.error('Response data:', error.response.data);
+      console.error('Response status:', error.response.status);
+    } else if (error.request) {
+      // Request was made but no response received
+      toast.error("Network error. Please check your connection.");
+      console.error('Request error:', error.request);
+    } else {
+      // Something else happened
+      toast.error(error.message || "An unexpected error occurred");
+      console.error('Error:', error.message);
+    }
   }
+};
+
+
+  
 
   useEffect(() => {
     if (user) {
