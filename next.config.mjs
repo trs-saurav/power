@@ -14,6 +14,14 @@ const nextConfig = {
             },
         ],
     },
+    api: {
+        bodyParser: {
+            sizeLimit: '10mb', // Increase if needed
+        },
+    },
+    experimental: {
+        serverComponentsExternalPackages: ['cloudinary'],
+    },
 };
 
 export default nextConfig;

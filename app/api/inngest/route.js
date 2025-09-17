@@ -1,5 +1,5 @@
 import { serve } from "inngest/next";
-import { inngest } from "@/config/inngest"; // This should export the Inngest client instance
+import { createUserOrder, inngest } from "@/config/inngest"; // This should export the Inngest client instance
 import {
   syncUserCreation,
   syncUserUpdate,
@@ -12,5 +12,6 @@ export const { GET, POST ,PUT } = serve({
     syncUserCreation,
     syncUserUpdate,
     syncUserDeletion,
+    createUserOrder
   ],
 });
