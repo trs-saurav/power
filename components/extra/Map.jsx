@@ -6,8 +6,8 @@ const Map = ({ embedUrl }) => {
   return (
     <iframe
       src={embedUrl}
-      width="200"
-      height="180"
+      width='full'
+      height='full'
       className='rounded-lg shadow-lg '
       allowFullScreen
       loading="lazy"

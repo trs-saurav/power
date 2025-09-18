@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children, requiredRole = 'admin' }) => {
       const userRole = user?.publicMetadata?.role
       if (userRole !== requiredRole) {
         toast.error('You do not have permission to access this page')
-        router.push('/unauthorized')
+        router.push('/')
         return
       }
     }

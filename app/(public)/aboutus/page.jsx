@@ -130,19 +130,14 @@ export default function AboutPage() {
             variants={staggerContainer}
             className="text-center"
           >
-            <motion.div variants={scaleIn} className="mb-6">
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-violet-500/10 border border-blue-200/50 dark:border-blue-800/50 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300 backdrop-blur-sm">
-                <Sparkles className="w-4 h-4" />
-                Powering Tomorrow, Today
-              </span>
-            </motion.div>
+
 
             <motion.h1 
               variants={fadeInUp}
               className="text-5xl md:text-7xl font-black mb-6"
             >
               <span className="bg-gradient-to-r from-slate-900 via-blue-800 to-violet-800 dark:from-white dark:via-blue-200 dark:to-violet-200 bg-clip-text text-transparent">
-                About
+                ABOUT
               </span>
               <br />
               <span className="bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">

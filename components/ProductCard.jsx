@@ -29,9 +29,9 @@ const ProductCard = ({ product }) => {
     <motion.div
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="group w-full max-w-sm"
+      className="group w-full  max-w-sm"
     >
-      <Card className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-card/80 backdrop-blur-sm">
+      <Card className="overflow-hidden  border shadow-lg hover:shadow-2xl transition-all duration-500 bg-card/80 backdrop-blur-sm">
         <div className="relative">
           {/* Product Image Container */}
           <div 

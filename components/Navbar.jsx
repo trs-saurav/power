@@ -17,7 +17,8 @@ import {
   Camera,
   Sparkles,
   Package,
-  ShoppingBag
+  ShoppingBag,
+  Settings
 } from "lucide-react";
 
 const Navbar = () => {
@@ -49,6 +50,7 @@ const Navbar = () => {
     { href: "/aboutus", label: "About", icon: Info },
     { href: "/gallery", label: "Gallery", icon: Camera },
     { href: "/contact-us", label: "Contact", icon: Phone },
+    { href: "/services", label: "Services", icon: Settings }
   ];
 
   return (
