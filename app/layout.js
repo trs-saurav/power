@@ -72,19 +72,6 @@ export default function RootLayout({ children }) {
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/favicon.png" sizes="any" />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                try {
-                  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark')
-                  } else {
-                    document.documentElement.classList.remove('dark')
-                  }
-                } catch (_) {}
-              `,
-            }}
-          />
         </head>
         <body className={`${outfit.className} antialiased bg-background text-foreground`}>
           <ThemeProvider

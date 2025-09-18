@@ -31,12 +31,49 @@ export async function POST(request) {
     const category = formData.get("category");
     const price = formData.get("price");
     const offerPrice = formData.get("offerPrice");
+    const brand = formData.get("brand");
+    const model = formData.get("model");
+    
+    // Warranty fields
+    const warrantyPeriod = formData.get("warrantyPeriod");
+    const warrantyType = formData.get("warrantyType");
+    
+    // Capacity fields
+    const capacityValue = formData.get("capacityValue");
+    const capacityUnit = formData.get("capacityUnit");
+    
+    // Additional fields
+    const availability = formData.get("availability");
+    const weightValue = formData.get("weightValue");
+    const weightUnit = formData.get("weightUnit");
+    
     const files = formData.getAll("images"); // array of Web File
 
     // Basic validation
-    if (!name || !description || !category || !price || !offerPrice) {
-      return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
+    if (!name || !description || !category || !price || !offerPrice || !brand || !model) {
+      return NextResponse.json({ 
+        success: false, 
+        message: "Missing required fields: name, description, category, price, offerPrice, brand, model" 
+      }, { status: 400 });
     }
+    
+    // Warranty validation
+    if (!warrantyPeriod || !warrantyType) {
+      return NextResponse.json({ 
+        success: false, 
+        message: "Missing warranty information: warrantyPeriod and warrantyType are required" 
+      }, { status: 400 });
+    }
+    
+    // Validate warranty type enum
+    const validWarrantyTypes = ["manufacturer", "seller", "extended", "none"];
+    if (!validWarrantyTypes.includes(warrantyType)) {
+      return NextResponse.json({ 
+        success: false, 
+        message: "Invalid warranty type. Must be: manufacturer, seller, extended, or none" 
+      }, { status: 400 });
+    }
+    
     if (!files || files.length === 0) {
       return NextResponse.json({ success: false, message: "No image files received" }, { status: 400 });
     }
@@ -76,18 +113,49 @@ export async function POST(request) {
     const images = uploadResults.map((r) => r.secure_url);
     console.log("Uploaded image URLs:", images);
 
-    // Save to DB
-    await connectDB();
-    const newProduct = await Product.create({
+    // Prepare product data
+    const productData = {
       userId,
       name,
       description,
       category,
       price: Number(price),
       offerPrice: Number(offerPrice),
+      brand,
+      model,
+      warranty: {
+        period: Number(warrantyPeriod),
+        type: warrantyType
+      },
       images,
       date: Date.now()
-    });
+    };
+
+    // Add capacity if provided
+    if (capacityValue || capacityUnit) {
+      productData.capacity = {};
+      if (capacityValue) productData.capacity.value = Number(capacityValue);
+      if (capacityUnit) productData.capacity.unit = capacityUnit;
+    }
+
+    // Add availability if provided
+    if (availability) {
+      const validAvailability = ["in_stock", "out_of_stock", "pre_order", "discontinued"];
+      if (validAvailability.includes(availability)) {
+        productData.availability = availability;
+      }
+    }
+
+    // Add weight if provided
+    if (weightValue || weightUnit) {
+      productData.weight = {};
+      if (weightValue) productData.weight.value = Number(weightValue);
+      if (weightUnit) productData.weight.unit = weightUnit;
+    }
+
+    // Save to DB
+    await connectDB();
+    const newProduct = await Product.create(productData);
 
     return NextResponse.json({
       success: true,

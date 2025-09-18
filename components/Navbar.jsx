@@ -268,7 +268,7 @@ const Navbar = () => {
       </nav>
 
       {/* Spacer to prevent content from hiding behind fixed navbar */}
-      <div className="h-16 lg:h-20"></div>
+      <div className="m-3"></div>
     </>
   );
 };

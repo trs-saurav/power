@@ -73,7 +73,7 @@ const Orders = () => {
                                 />
                                 <p className="flex flex-col gap-3">
                                     <span className="font-medium">
-                                        {order.items.map((item) => item.productId.name + ` x ${item.quantity}`).join(", ")}
+                                        {order.items.map((item) => item.productId?.name + ` x ${item.quantity}`).join(", ")}
                                     </span>
                                     <span>Items : {order.items.length}</span>
                                 </p>
