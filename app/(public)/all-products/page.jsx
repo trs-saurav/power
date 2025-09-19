@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ArrowRight } from "lucide-react";
 
 // Icons
 import { 
@@ -558,127 +559,135 @@ const ProductGridCard = ({ product, onProductClick }) => {
 // Enhanced Product List Card Component with buttons on right side, no rating, and favorite button
 const ProductListCard = ({ product, onProductClick }) => {
   const { addToCart, router } = useAppContext();
-  const [isFavorite, setIsFavorite] = useState(false);
   
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-      <CardContent className="p-8">
-        <div className="flex gap-8">
-          {/* Product Image - Clickable */}
-          <div 
-            className="w-32 h-32 flex-shrink-0 relative bg-muted rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-            onClick={() => onProductClick(product._id)}
-          >
-            <img
-              src={product.images?.[0]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-            {product.price !== product.offerPrice && (
-              <Badge className="absolute -top-1 -right-1 bg-destructive text-xs">
-                {Math.round(((product.price - product.offerPrice) / product.price) * 100)}% OFF
-              </Badge>
-            )}
+    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50 hover:border-primary/20">
+      <CardContent className="p-3 md:p-4">
+        <div className="flex gap-3 md:gap-4">
+          
+          {/* Product Image */}
+          <div className="relative flex-shrink-0">
+            <div 
+              className="w-20 h-20 md:w-24 md:h-24 bg-muted rounded-lg overflow-hidden cursor-pointer group-hover:scale-[1.02] transition-all duration-300 shadow-sm"
+              onClick={() => onProductClick(product._id)}
+            >
+              <img
+                src={product.images?.[0]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Discount Badge */}
+              {product.price !== product.offerPrice && (
+                <Badge className="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white text-xs px-1.5 py-0.5 shadow-sm">
+                  {Math.round(((product.price - product.offerPrice) / product.price) * 100)}%
+                </Badge>
+              )}
+            </div>
           </div>
           
           {/* Product Details */}
-          <div className="flex-1 min-w-0 flex flex-col">
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex-1 min-w-0 mr-8">
-                {/* Clickable Title */}
+          <div className="flex-1 min-w-0 flex flex-col justify-between">
+            
+            {/* Top Section */}
+            <div className="flex justify-between items-start gap-3">
+              
+              {/* Product Info */}
+              <div className="flex-1 min-w-0">
                 <h3 
-                  className="font-semibold text-xl line-clamp-2 mb-3 cursor-pointer hover:text-primary transition-colors"
+                  className="font-semibold text-sm md:text-base line-clamp-2 mb-1 cursor-pointer hover:text-primary transition-colors"
                   onClick={() => onProductClick(product._id)}
                 >
                   {product.name}
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {product.brand || "Unknown"} • {product.category}
-                </p>
                 
-                {/* Add to Favorites Button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsFavorite(!isFavorite);
-                  }}
-                  className={`w-fit px-3 h-9 ${isFavorite ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-foreground'}`}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                  <span>{product.brand || "Unknown"}</span>
+                  <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
+                  <span>{product.model}</span>
+                </div>
+
+                {/* Description - Mobile hidden, Desktop shown */}
+                <p 
+                  className="hidden md:block text-xs text-muted-foreground line-clamp-1 cursor-pointer hover:text-foreground transition-colors"
+                  onClick={() => onProductClick(product._id)}
                 >
-                  <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
-                  {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                </Button>
+                  {product.description || "High-quality electrical product with professional performance."}
+                </p>
               </div>
               
-              {/* Price and Actions Section - Right Side */}
-              <div className="flex flex-col items-end gap-8 min-w-fit">
-                {/* Price Section */}
-                <div className="text-right">
-                  <div className="font-bold text-3xl mb-2">
+              {/* Price Section */}
+              <div className="text-right flex-shrink-0">
+                <div className="flex items-baseline gap-1 justify-end">
+                  <span className="font-bold text-base md:text-lg text-foreground">
                     ₹{product.offerPrice?.toLocaleString()}
-                  </div>
+                  </span>
                   {product.price !== product.offerPrice && (
-                    <div className="text-base text-muted-foreground line-through mb-1">
+                    <span className="text-xs text-muted-foreground line-through">
                       ₹{product.price?.toLocaleString()}
-                    </div>
+                    </span>
                   )}
-                  <div className="text-sm text-green-600 font-medium">
-                    You save ₹{(product.price - product.offerPrice)?.toLocaleString()}
+                </div>
+                {product.price !== product.offerPrice && (
+                  <div className="text-xs text-green-600 font-medium">
+                    Save ₹{(product.price - product.offerPrice)?.toLocaleString()}
                   </div>
-                </div>
-                
-                {/* Action Buttons - Right Side with increased margin from top */}
-                <div className="flex flex-col gap-4 mt-8">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart(product._id);
-                    }}
-                    className="w-44 h-12"
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    Add to Cart
-                  </Button>
-                  <Button
-                    size="lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart(product._id);
-                      router.push('/cart');
-                    }}
-                    className="w-44 h-12"
-                  >
-                    Buy Now
-                  </Button>
-                </div>
+                )}
               </div>
             </div>
             
-            <p 
-              className="text-base text-muted-foreground mb-6 line-clamp-3 cursor-pointer leading-relaxed"
-              onClick={() => onProductClick(product._id)}
-            >
-              {product.description || "No description available for this product."}
-            </p>
-            
-            {/* Additional product info - Bottom */}
-            <div className="mt-auto pt-6 border-t">
-              <div className="flex items-center gap-8 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Free Shipping</span>
+            {/* Bottom Section */}
+            <div className="flex justify-between items-center gap-3 mt-2">
+              
+              {/* Features - Simplified */}
+              <div className="flex gap-1 md:gap-2 text-xs flex-1">
+                <div className="flex items-center gap-1 text-green-600">
+                  <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                  <span className="hidden sm:inline">Free Ship</span>
+                  <span className="sm:hidden">🚚</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>7 Days Return</span>
+                <div className="flex items-center gap-1 text-blue-600">
+                  <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                  <span className="hidden sm:inline">Return</span>
+                  <span className="sm:hidden">↩️</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Warranty Included</span>
+                <div className="flex items-center gap-1 text-purple-600">
+                  <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
+                  <span className="hidden sm:inline">Warranty</span>
+                  <span className="sm:hidden">🛡️</span>
                 </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2 flex-shrink-0">
+                
+                {/* Add to Cart */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product._id);
+                  }}
+                  className="h-7 px-3 text-xs hover:bg-primary/5 hover:border-primary/50 transition-all duration-200"
+                >
+                  <ShoppingCart className="w-3 h-3 md:mr-1" />
+                  <span className="hidden md:inline">Cart</span>
+                </Button>
+                
+                {/* Buy Now */}
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product._id);
+                    router.push('/cart');
+                  }}
+                  className="h-7 px-3 text-xs bg-primary hover:bg-primary/90 transition-all duration-200"
+                >
+                  <span className="hidden md:inline">Buy</span>
+                  <span className="md:hidden">🛒</span>
+                </Button>
               </div>
             </div>
           </div>
@@ -687,5 +696,7 @@ const ProductListCard = ({ product, onProductClick }) => {
     </Card>
   );
 };
+
+
 
 export default AllProducts;
