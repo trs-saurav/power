@@ -55,7 +55,7 @@ export default function AboutPage() {
     },
     { 
       icon: Users, 
-      value: "100K+", 
+      value: "10K+", 
       label: "Happy Customers", 
       color: "from-emerald-500 to-teal-500",
       bgColor: "bg-emerald-50 dark:bg-emerald-950/30"
@@ -63,52 +63,18 @@ export default function AboutPage() {
     { 
       icon: Award, 
       value: "30+", 
-      label: "Years Experience", 
+      label: "Overall Years Experience", 
       color: "from-violet-500 to-purple-500",
       bgColor: "bg-violet-50 dark:bg-violet-950/30"
     }
   ];
 
-  const services = [
-    {
-      icon: Zap,
-      title: "UPS & Battery Solutions",
-      description: "Enterprise-grade backup power systems with AI-powered monitoring and predictive maintenance capabilities.",
-      features: ["Smart Monitoring", "Predictive Analytics", "24/7 Support"],
-      gradient: "from-blue-500 via-blue-600 to-cyan-500",
-      accent: "blue"
-    },
-    {
-      icon: Shield,
-      title: "Voltage Stabilizers", 
-      description: "Advanced voltage regulation technology protecting critical infrastructure with real-time adaptive control.",
-      features: ["Real-time Protection", "Adaptive Control", "IoT Enabled"],
-      gradient: "from-amber-500 via-orange-500 to-yellow-500",
-      accent: "amber"
-    },
-    {
-      icon: Sun,
-      title: "Solar & Green Energy",
-      description: "Next-generation solar solutions with integrated energy storage and smart grid connectivity.",
-      features: ["Smart Grid Ready", "Energy Storage", "Carbon Tracking"],
-      gradient: "from-emerald-500 via-green-500 to-teal-500",
-      accent: "emerald"
-    },
-    {
-      icon: Camera,
-      title: "AI Security Systems",
-      description: "Intelligent surveillance with facial recognition, behavior analysis, and cloud-based management.",
-      features: ["AI Recognition", "Behavior Analysis", "Cloud Management"],
-      gradient: "from-red-500 via-rose-500 to-pink-500",
-      accent: "red"
-    }
-  ];
+
 
   const achievements = [
-    { label: "Industry Recognition", value: "15+ Awards" },
     { label: "Project Success Rate", value: "99.8%" },
     { label: "Customer Retention", value: "95%" },
-    { label: "Green Energy Impact", value: "50MW+" }
+    { label: "Green Energy Impact", value: "1 MW+" }
   ];
 
   return (
@@ -301,64 +267,7 @@ export default function AboutPage() {
           </motion.div>
 
           {/* Services Grid - Enhanced */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="mb-20"
-          >
-            <motion.div variants={fadeInUp} className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-white mb-4">
-                Future-Ready Solutions
-              </h2>
-              <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
-                Pioneering tomorrow's technology today with AI-powered, sustainable, and intelligent systems
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {services.map((service, index) => (
-                <motion.div
-                  key={index}
-                  variants={fadeInUp}
-                  whileHover={{ y: -10, scale: 1.03 }}
-                  className="group relative overflow-hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-700/50 rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500"
-                >
-                  {/* Animated Background */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-6">
-                      <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300`}>
-                        <service.icon className="w-8 h-8 text-white" />
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transform group-hover:translate-x-1 transition-all duration-300" />
-                    </div>
-
-                    <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-                      {service.title}
-                    </h3>
-
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6 text-lg">
-                      {service.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2">
-                      {service.features.map((feature, idx) => (
-                        <span
-                          key={idx}
-                          className={`px-3 py-1 bg-${service.accent}-50 dark:bg-${service.accent}-950/20 text-${service.accent}-700 dark:text-${service.accent}-300 text-sm font-medium rounded-full border border-${service.accent}-200/50 dark:border-${service.accent}-800/50`}
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+          
 
           {/* Core Values - Modern Pill Design */}
           <motion.div

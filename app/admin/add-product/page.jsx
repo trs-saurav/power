@@ -310,12 +310,16 @@ const AddProduct = () => {
                       <SelectContent>
                         <SelectItem value="BATTERY">BATTERY</SelectItem>
                         <SelectItem value="UPS">UPS</SelectItem>
+                        <SelectItem value="ONLINE UPS">ONLINE UPS</SelectItem>
                         <SelectItem value="STABILIZER">STABILIZER</SelectItem>
-                        <SelectItem value="SOLAR">SOLAR</SelectItem>
+                        <SelectItem value="SOLAR PANEL">SOLAR PANEL</SelectItem>
+                        <SelectItem value="SOLAR PCU">SOLAR PCU</SelectItem>
+                        <SelectItem value="SOLAR BATTERY">SOLAR BATTERY</SelectItem>
                         <SelectItem value="CCTV">CCTV</SelectItem>
                         <SelectItem value="OTHERS">OTHERS</SelectItem>
-                        <SelectItem value="Camera">Camera</SelectItem>
+                        <SelectItem value="CAMERA">CAMERA</SelectItem>
                         <SelectItem value="Accessories">Accessories</SelectItem>
+                        <SelectItem value="AUTOMOTIVE BATTERY">AUTOMOTIVE BATTERY</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

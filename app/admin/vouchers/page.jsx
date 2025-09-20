@@ -52,7 +52,9 @@ import {
   TrendingUp,
   Users,
   Clock,
-  Loader2
+  Loader2,
+  MoreVertical,
+  ChevronDown
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -63,6 +65,7 @@ const VoucherManagement = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [statistics, setStatistics] = useState({
     activeCount: 0,
     expiredCount: 0,
@@ -87,6 +90,17 @@ const VoucherManagement = () => {
     applicableBrands: [],
     isActive: true
   });
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Filter and search logic
   const filteredVouchers = useMemo(() => {
@@ -294,9 +308,165 @@ const VoucherManagement = () => {
     toast.success('Voucher code copied!');
   };
 
+  // Mobile Card Component for Vouchers
+  const VoucherCard = ({ voucher }) => {
+    const status = getStatusBadge(voucher);
+    const [showActions, setShowActions] = useState(false);
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+      >
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            {/* Header */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-lg truncate">{voucher.code}</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyVoucherCode(voucher.code)}
+                    className="h-6 w-6 p-0 flex-shrink-0"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                  {voucher.title}
+                </p>
+                <Badge variant={status.variant} className={`${status.color} text-xs`}>
+                  {status.label}
+                </Badge>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowActions(!showActions)}
+                className="h-8 w-8 p-0 flex-shrink-0"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-muted-foreground">Discount</p>
+                <p className="font-medium">
+                  {voucher.discountType === 'percentage' 
+                    ? `${voucher.discountValue}%` 
+                    : `₹${voucher.discountValue}`}
+                </p>
+                {voucher.maxDiscountAmount && (
+                  <p className="text-xs text-muted-foreground">
+                    Max: ₹{voucher.maxDiscountAmount}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <p className="text-muted-foreground">Usage</p>
+                <p className="font-medium">
+                  {voucher.usedCount}
+                  {voucher.usageLimit && ` / ${voucher.usageLimit}`}
+                </p>
+                {voucher.usageLimit && (
+                  <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                    <div 
+                      className="bg-blue-600 h-1 rounded-full transition-all duration-500" 
+                      style={{ width: `${Math.min((voucher.usedCount / voucher.usageLimit) * 100, 100)}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Validity */}
+            <div className="mt-3 pt-3 border-t">
+              <p className="text-muted-foreground text-sm">Valid from</p>
+              <p className="text-sm font-medium">
+                {format(new Date(voucher.startDate), "MMM dd")} - {format(new Date(voucher.endDate), "MMM dd, yyyy")}
+              </p>
+            </div>
+
+            {/* Actions (Collapsible) */}
+            <AnimatePresence>
+              {showActions && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="mt-3 pt-3 border-t"
+                >
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleToggleStatus(voucher._id, voucher.isActive)}
+                    >
+                      {voucher.isActive ? (
+                        <>
+                          <EyeOff className="w-3 h-3 mr-1" />
+                          Deactivate
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3 mr-1" />
+                          Activate
+                        </>
+                      )}
+                    </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm" className="flex-1">
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="mx-4">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Voucher</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete voucher "{voucher.code}"?
+                            {voucher.usedCount > 0 && (
+                              <span className="text-orange-600 font-medium">
+                                <br />Warning: This voucher has been used {voucher.usedCount} times.
+                              </span>
+                            )}
+                            <br />This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteVoucher(voucher._id, voucher.code)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen p-4">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
           <p>Loading vouchers...</p>
@@ -306,19 +476,19 @@ const VoucherManagement = () => {
   }
 
   return (
-    <div className="w-full min-h-screen p-4 lg:p-6 bg-background">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="w-full min-h-screen p-3 md:p-6 bg-background">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         {/* Header with Statistics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <Card>
-            <CardContent className="p-4 lg:p-6">
-              <div className="flex items-center gap-3 lg:gap-4">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Ticket className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-2 md:gap-4">
+                <div className="w-8 h-8 md:w-12 md:h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Ticket className="w-4 h-4 md:w-6 md:h-6 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs lg:text-sm text-muted-foreground">Total</p>
-                  <p className="text-lg lg:text-2xl font-bold">{filteredStatistics.total}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Total</p>
+                  <p className="text-lg md:text-2xl font-bold">{filteredStatistics.total}</p>
                   {(searchQuery || statusFilter !== 'all') && (
                     <p className="text-xs text-muted-foreground">of {vouchers.length}</p>
                   )}
@@ -328,42 +498,42 @@ const VoucherManagement = () => {
           </Card>
 
           <Card>
-            <CardContent className="p-4 lg:p-6">
-              <div className="flex items-center gap-3 lg:gap-4">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-2 md:gap-4">
+                <div className="w-8 h-8 md:w-12 md:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-4 h-4 md:w-6 md:h-6 text-green-600" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs lg:text-sm text-muted-foreground">Active</p>
-                  <p className="text-lg lg:text-2xl font-bold text-green-600">{filteredStatistics.active}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Active</p>
+                  <p className="text-lg md:text-2xl font-bold text-green-600">{filteredStatistics.active}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 lg:p-6">
-              <div className="flex items-center gap-3 lg:gap-4">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-2 md:gap-4">
+                <div className="w-8 h-8 md:w-12 md:h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-4 h-4 md:w-6 md:h-6 text-red-600" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs lg:text-sm text-muted-foreground">Expired</p>
-                  <p className="text-lg lg:text-2xl font-bold text-red-600">{filteredStatistics.expired}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Expired</p>
+                  <p className="text-lg md:text-2xl font-bold text-red-600">{filteredStatistics.expired}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 lg:p-6">
-              <div className="flex items-center gap-3 lg:gap-4">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="w-5 h-5 lg:w-6 lg:h-6 text-blue-600" />
+            <CardContent className="p-3 md:p-6">
+              <div className="flex items-center gap-2 md:gap-4">
+                <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs lg:text-sm text-muted-foreground">Usage</p>
-                  <p className="text-lg lg:text-2xl font-bold text-blue-600">{filteredStatistics.totalUsage}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Usage</p>
+                  <p className="text-lg md:text-2xl font-bold text-blue-600">{filteredStatistics.totalUsage}</p>
                 </div>
               </div>
             </CardContent>
@@ -372,25 +542,25 @@ const VoucherManagement = () => {
 
         {/* Controls */}
         <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="relative flex-1 w-full">
+          <CardContent className="p-3 md:p-4">
+            <div className="space-y-3 md:space-y-0 md:flex md:items-center md:gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search vouchers by code, title, or description..."
+                  placeholder="Search vouchers..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
               
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex gap-2">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="Filter by status" />
+                  <SelectTrigger className="flex-1 md:w-48">
+                    <SelectValue placeholder="Filter" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Vouchers</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="expired">Expired</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
@@ -402,10 +572,10 @@ const VoucherManagement = () => {
                   <DialogTrigger asChild>
                     <Button className="gap-2 whitespace-nowrap">
                       <Plus className="w-4 h-4" />
-                      Create Voucher
+                      {isMobile ? 'Add' : 'Create Voucher'}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+                  <DialogContent className="mx-3 md:mx-0 max-w-2xl max-h-[90vh] overflow-hidden">
                     <DialogHeader>
                       <DialogTitle>Create New Voucher</DialogTitle>
                     </DialogHeader>
@@ -579,7 +749,7 @@ const VoucherManagement = () => {
                           <Label htmlFor="isActive">Active</Label>
                         </div>
 
-                        <div className="flex gap-4 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                           <Button type="submit" className="flex-1" disabled={isSubmitting}>
                             {isSubmitting ? (
                               <>
@@ -595,6 +765,7 @@ const VoucherManagement = () => {
                             variant="outline" 
                             onClick={() => setShowCreateDialog(false)}
                             disabled={isSubmitting}
+                            className="flex-1 sm:flex-none"
                           >
                             Cancel
                           </Button>
@@ -610,168 +781,180 @@ const VoucherManagement = () => {
 
         {/* Vouchers Display */}
         {filteredVouchers.length > 0 ? (
-          <Card>
-            <CardContent className="p-0 overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[200px]">Voucher</TableHead>
-                      <TableHead className="min-w-[120px]">Discount</TableHead>
-                      <TableHead className="min-w-[100px]">Usage</TableHead>
-                      <TableHead className="min-w-[180px]">Validity</TableHead>
-                      <TableHead className="min-w-[100px]">Status</TableHead>
-                      <TableHead className="text-right min-w-[120px]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <AnimatePresence>
-                      {filteredVouchers.map((voucher) => {
-                        const status = getStatusBadge(voucher);
-                        return (
-                          <motion.tr
-                            key={voucher._id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="group"
-                          >
-                            <TableCell>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <p className="font-medium">{voucher.code}</p>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => copyVoucherCode(voucher.code)}
-                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <Copy className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                                <p className="text-sm text-muted-foreground line-clamp-1">
-                                  {voucher.title}
-                                </p>
-                              </div>
-                            </TableCell>
-                            
-                            <TableCell>
-                              <p className="font-medium">
-                                {voucher.discountType === 'percentage' 
-                                  ? `${voucher.discountValue}%` 
-                                  : `₹${voucher.discountValue}`}
-                              </p>
-                              {voucher.maxDiscountAmount && (
-                                <p className="text-xs text-muted-foreground">
-                                  Max: ₹{voucher.maxDiscountAmount}
-                                </p>
-                              )}
-                            </TableCell>
-                            
-                            <TableCell>
-                              <p className="text-sm">
-                                {voucher.usedCount}
-                                {voucher.usageLimit && ` / ${voucher.usageLimit}`}
-                              </p>
-                              {voucher.usageLimit && (
-                                <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-                                  <div 
-                                    className="bg-blue-600 h-1 rounded-full transition-all duration-500" 
-                                    style={{ width: `${Math.min((voucher.usedCount / voucher.usageLimit) * 100, 100)}%` }}
-                                  />
-                                </div>
-                              )}
-                            </TableCell>
-                            
-                            <TableCell>
-                              <p className="text-sm">
-                                {format(new Date(voucher.startDate), "MMM dd")} - {format(new Date(voucher.endDate), "MMM dd, yyyy")}
-                              </p>
-                            </TableCell>
-                            
-                            <TableCell>
-                              <Badge variant={status.variant} className={`${status.color}`}>
-                                {status.label}
-                              </Badge>
-                            </TableCell>
-                            
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                {/* Toggle Status Button */}
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => handleToggleStatus(voucher._id, voucher.isActive)}
-                                  title={voucher.isActive ? "Deactivate" : "Activate"}
-                                >
-                                  {voucher.isActive ? (
-                                    <EyeOff className="w-4 h-4 text-orange-600" />
-                                  ) : (
-                                    <Eye className="w-4 h-4 text-green-600" />
+          <>
+            {/* Mobile View - Cards */}
+            {isMobile ? (
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {filteredVouchers.map((voucher) => (
+                    <VoucherCard key={voucher._id} voucher={voucher} />
+                  ))}
+                </AnimatePresence>
+              </div>
+            ) : (
+              /* Desktop View - Table */
+              <Card>
+                <CardContent className="p-0 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[200px]">Voucher</TableHead>
+                          <TableHead className="min-w-[120px]">Discount</TableHead>
+                          <TableHead className="min-w-[100px]">Usage</TableHead>
+                          <TableHead className="min-w-[180px]">Validity</TableHead>
+                          <TableHead className="min-w-[100px]">Status</TableHead>
+                          <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <AnimatePresence>
+                          {filteredVouchers.map((voucher) => {
+                            const status = getStatusBadge(voucher);
+                            return (
+                              <motion.tr
+                                key={voucher._id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="group"
+                              >
+                                <TableCell>
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <p className="font-medium">{voucher.code}</p>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => copyVoucherCode(voucher.code)}
+                                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        <Copy className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground line-clamp-1">
+                                      {voucher.title}
+                                    </p>
+                                  </div>
+                                </TableCell>
+                                
+                                <TableCell>
+                                  <p className="font-medium">
+                                    {voucher.discountType === 'percentage' 
+                                      ? `${voucher.discountValue}%` 
+                                      : `₹${voucher.discountValue}`}
+                                  </p>
+                                  {voucher.maxDiscountAmount && (
+                                    <p className="text-xs text-muted-foreground">
+                                      Max: ₹{voucher.maxDiscountAmount}
+                                    </p>
                                   )}
-                                </Button>
-
-                                {/* Delete Button */}
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
+                                </TableCell>
+                                
+                                <TableCell>
+                                  <p className="text-sm">
+                                    {voucher.usedCount}
+                                    {voucher.usageLimit && ` / ${voucher.usageLimit}`}
+                                  </p>
+                                  {voucher.usageLimit && (
+                                    <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
+                                      <div 
+                                        className="bg-blue-600 h-1 rounded-full transition-all duration-500" 
+                                        style={{ width: `${Math.min((voucher.usedCount / voucher.usageLimit) * 100, 100)}%` }}
+                                      />
+                                    </div>
+                                  )}
+                                </TableCell>
+                                
+                                <TableCell>
+                                  <p className="text-sm">
+                                    {format(new Date(voucher.startDate), "MMM dd")} - {format(new Date(voucher.endDate), "MMM dd, yyyy")}
+                                  </p>
+                                </TableCell>
+                                
+                                <TableCell>
+                                  <Badge variant={status.variant} className={`${status.color}`}>
+                                    {status.label}
+                                  </Badge>
+                                </TableCell>
+                                
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-1">
                                     <Button 
                                       variant="ghost" 
                                       size="sm" 
-                                      className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                      title="Delete Voucher"
+                                      className="h-8 w-8 p-0"
+                                      onClick={() => handleToggleStatus(voucher._id, voucher.isActive)}
+                                      title={voucher.isActive ? "Deactivate" : "Activate"}
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      {voucher.isActive ? (
+                                        <EyeOff className="w-4 h-4 text-orange-600" />
+                                      ) : (
+                                        <Eye className="w-4 h-4 text-green-600" />
+                                      )}
                                     </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Voucher</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete voucher "{voucher.code}"?
-                                        {voucher.usedCount > 0 && (
-                                          <span className="text-orange-600 font-medium">
-                                            <br />Warning: This voucher has been used {voucher.usedCount} times.
-                                          </span>
-                                        )}
-                                        <br />This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDeleteVoucher(voucher._id, voucher.code)}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      >
-                                        Delete Voucher
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </TableCell>
-                          </motion.tr>
-                        );
-                      })}
-                    </AnimatePresence>
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm" 
+                                          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                          title="Delete Voucher"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Delete Voucher</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to delete voucher "{voucher.code}"?
+                                            {voucher.usedCount > 0 && (
+                                              <span className="text-orange-600 font-medium">
+                                                <br />Warning: This voucher has been used {voucher.usedCount} times.
+                                              </span>
+                                            )}
+                                            <br />This action cannot be undone.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction
+                                            onClick={() => handleDeleteVoucher(voucher._id, voucher.code)}
+                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          >
+                                            Delete
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </div>
+                                </TableCell>
+                              </motion.tr>
+                            );
+                          })}
+                        </AnimatePresence>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         ) : (
           <Card>
-            <CardContent className="p-12 text-center">
+            <CardContent className="p-8 md:p-12 text-center">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-4"
               >
-                <Ticket className="w-16 h-16 text-muted-foreground mx-auto" />
-                <h3 className="text-xl font-medium">
+                <Ticket className="w-12 h-12 md:w-16 md:h-16 text-muted-foreground mx-auto" />
+                <h3 className="text-lg md:text-xl font-medium">
                   {searchQuery || statusFilter !== 'all' ? 'No vouchers match your filters' : 'No vouchers found'}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm md:text-base">
                   {searchQuery || statusFilter !== 'all'
                     ? 'Try adjusting your search criteria or filters.' 
                     : 'Create your first voucher to get started with discount management.'

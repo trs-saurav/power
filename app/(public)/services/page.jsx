@@ -32,7 +32,7 @@ const servicesData = [
     color: "text-blue-600",
     gradient: "from-blue-500 to-cyan-500",
     bgColor: "bg-blue-50 dark:bg-blue-950/20",
-    projects: "500+",
+    projects: "50k+",
     rating: "4.9"
   },
   {
@@ -44,7 +44,7 @@ const servicesData = [
     color: "text-purple-600",
     gradient: "from-purple-500 to-pink-500",
     bgColor: "bg-purple-50 dark:bg-purple-950/20",
-    projects: "750+",
+    projects: "10k+",
     rating: "4.8"
   },
   {
@@ -68,7 +68,7 @@ const servicesData = [
     color: "text-green-600",
     gradient: "from-green-500 to-emerald-500",
     bgColor: "bg-green-50 dark:bg-green-950/20",
-    projects: "400+",
+    projects: "2k+",
     rating: "4.7"
   },
   {
@@ -80,7 +80,7 @@ const servicesData = [
     color: "text-red-600",
     gradient: "from-red-500 to-rose-500",
     bgColor: "bg-red-50 dark:bg-red-950/20",
-    projects: "1000+",
+    projects: "5k+",
     rating: "4.8"
   },
   {
@@ -92,7 +92,7 @@ const servicesData = [
     color: "text-indigo-600",
     gradient: "from-indigo-500 to-blue-500",
     bgColor: "bg-indigo-50 dark:bg-indigo-950/20",
-    projects: "200+",
+    projects: "5k+",
     rating: "4.9"
   }
 ];
@@ -207,14 +207,14 @@ const Services = () => {
               <div className="text-center">
                 <div className="text-4xl font-bold text-primary flex items-center justify-center gap-2">
                   <TrendingUp className="w-8 h-8" />
-                  100K+
+                  10K+
                 </div>
                 <div className="text-muted-foreground">Projects Completed</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-primary flex items-center justify-center gap-2">
                   <Award className="w-8 h-8" />
-                  30+
+                  25+
                 </div>
                 <div className="text-muted-foreground">Years Experience</div>
               </div>

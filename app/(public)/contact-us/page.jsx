@@ -174,11 +174,11 @@ const Contact = () => {
                 <div className="text-xs md:text-sm text-muted-foreground">Support Available</div>
               </div>
               <div className="text-center">
-                <div className="text-lg md:text-2xl font-bold text-primary">20K+</div>
+                <div className="text-lg md:text-2xl font-bold text-primary">10K+</div>
                 <div className="text-xs md:text-sm text-muted-foreground">Happy Customers</div>
               </div>
               <div className="text-center">
-                <div className="text-lg md:text-2xl font-bold text-primary">20+</div>
+                <div className="text-lg md:text-2xl font-bold text-primary">25+</div>
                 <div className="text-xs md:text-sm text-muted-foreground">Years Experience</div>
               </div>
             </div>

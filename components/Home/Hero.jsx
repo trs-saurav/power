@@ -17,7 +17,7 @@ const HeroSection = () => {
   const slides = [
     {
       title: "Professional Electrical Solutions",
-      description: "Quality electrical services for your home and business with 15+ years of experience.",
+      description: "Quality electrical services for your home and business with 30+ years of experience.",
       buttonText: "Get Quote",
       buttonLink: "/contact-us"
     },
@@ -35,7 +35,7 @@ const HeroSection = () => {
     },
     {
       title: "Why Shop With Us?",
-      description: "15+ years experience, 5000+ happy customers, 24/7 support, and 100% quality guarantee on all products and services.",
+      description: "15+ years experience, 10000+ happy customers, 7 days support, and 100% quality guarantee on all products and services.",
       buttonText: "Shop Now",
       buttonLink: "/all-products"
     }
@@ -229,15 +229,15 @@ const HeroSection = () => {
               {/* Stats - Same for all slides */}
               <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
                 <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">15+</div>
+                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">25+</div>
                   <div className="text-sm text-white/80 font-medium">Years Experience</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">24/7</div>
+                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">365 Days</div>
                   <div className="text-sm text-white/80 font-medium">Support</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">5000+</div>
+                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">10000+</div>
                   <div className="text-sm text-white/80 font-medium">Customers</div>
                 </div>
               </div>

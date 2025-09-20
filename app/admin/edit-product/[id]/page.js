@@ -20,16 +20,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Icons
-import { 
-  Save, 
-  Loader2, 
-  ArrowLeft, 
-  Upload, 
-  X, 
-  Package, 
-  DollarSign, 
-  Shield, 
-  Weight, 
+import {
+  Save,
+  Loader2,
+  ArrowLeft,
+  Upload,
+  X,
+  Package,
+  DollarSign,
+  Shield,
+  Weight,
   Cpu,
   ImageIcon,
   AlertCircle,
@@ -249,7 +249,7 @@ const EditProduct = () => {
 
   return (
     <div className="min-h-screen bg-background pt-20">
-      <motion.div 
+      <motion.div
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -264,9 +264,9 @@ const EditProduct = () => {
             </div>
             <p className="text-muted-foreground">Update your product information and settings</p>
           </div>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             onClick={() => router.back()}
             className="w-fit"
           >
@@ -276,7 +276,7 @@ const EditProduct = () => {
         </motion.div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          
+
           {/* Product Images */}
           <motion.div variants={itemVariants}>
             <Card>
@@ -428,7 +428,7 @@ const EditProduct = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="brand">
                       Brand <span className="text-destructive">*</span>
@@ -454,7 +454,7 @@ const EditProduct = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="category">Category</Label>
                     <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
@@ -463,13 +463,18 @@ const EditProduct = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="BATTERY">BATTERY</SelectItem>
-                                                <SelectItem value="UPS">UPS</SelectItem>
-                                                <SelectItem value="STABILIZER">STABILIZER</SelectItem>
-                                         <SelectItem value="SOLAR">SOLAR</SelectItem>
-                                                <SelectItem value="CCTV">CCTV</SelectItem>
-                                                <SelectItem value="OTHERS">OTHERS</SelectItem>
-                                                <SelectItem value="Camera">Camera</SelectItem>
-                                                <SelectItem value="Accessories">Accessories</SelectItem>
+
+                        <SelectItem value="UPS">UPS</SelectItem>
+                        <SelectItem value="ONLINE UPS">ONLINE UPS</SelectItem>
+                        <SelectItem value="STABILIZER">STABILIZER</SelectItem>
+                        <SelectItem value="SOLAR PANEL">SOLAR PANEL</SelectItem>
+                        <SelectItem value="SOLAR PCU">SOLAR PCU</SelectItem>
+                        <SelectItem value="SOLAR BATTERY">SOLAR BATTERY</SelectItem>
+                        <SelectItem value="CCTV">CCTV</SelectItem>
+                        <SelectItem value="OTHERS">OTHERS</SelectItem>
+                        <SelectItem value="CAMERA">CAMERA</SelectItem>
+                        <SelectItem value="Accessories">Accessories</SelectItem>
+                        <SelectItem value="AUTOMOTIVE BATTERY">AUTOMOTIVE BATTERY</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -521,7 +526,7 @@ const EditProduct = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="offerPrice">
                       Offer Price <span className="text-destructive">*</span>
@@ -538,7 +543,7 @@ const EditProduct = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="availability">Availability</Label>
                     <Select value={formData.availability} onValueChange={(value) => handleInputChange('availability', value)}>
@@ -604,7 +609,7 @@ const EditProduct = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="warrantyType">
                       Warranty Type <span className="text-destructive">*</span>
@@ -640,7 +645,7 @@ const EditProduct = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
+
                   {/* Capacity */}
                   <Card>
                     <CardHeader className="pb-3">
@@ -670,7 +675,7 @@ const EditProduct = () => {
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   {/* Weight */}
                   <Card>
                     <CardHeader className="pb-3">
@@ -712,7 +717,7 @@ const EditProduct = () => {
           </motion.div>
 
           {/* Action Buttons */}
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4 pt-8"
           >
@@ -725,7 +730,7 @@ const EditProduct = () => {
             >
               Cancel
             </Button>
-            
+
             <Button
               type="submit"
               disabled={updating}
