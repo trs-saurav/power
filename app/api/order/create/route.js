@@ -1,11 +1,9 @@
 import { getAuth } from "@clerk/nextjs/server";
 import connectDB from "@/config/db";
 import User from "@/models/user";
-import Order from "@/models/order";
 import Product from "@/models/product";
 import Voucher from "@/models/voucher";
 import { inngest } from "@/config/inngest";
-import { sendOrderConfirmationEmail } from "@/lib/emailService";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
@@ -39,7 +37,7 @@ export async function POST(request) {
             );
         }
 
-        // Validate products and calculate amount
+        // Validate products and calculate amount (but don't create order here)
         let totalAmount = 0;
         const validatedItems = [];
         const notFoundProducts = [];
@@ -262,103 +260,31 @@ export async function POST(request) {
 
         console.log(`Final calculation: Subtotal: ${totalAmount} + Delivery: ${deliveryFee} - Discount: ${finalDiscount} = Total: ${finalAmount}`);
 
-        // Create order using your existing schema structure
-        const orderData = {
-            userId: userId,
-            items: validatedItems,
-            amount: finalAmount,
-            subtotal: totalAmount,
-            deliveryFee: deliveryFee,
-            discount: finalDiscount,
-            promoCode: promoCode || null,
-            appliedVoucher: appliedVoucher,
-            address: address,
-            status: "Order Placed",
-            paymentMethod: "COD",
-            payment: false,
-            date: Date.now()
-        };
+        // Get user email info
+        let userEmail = null;
+        let userName = null;
 
-        const newOrder = new Order(orderData);
-        const savedOrder = await newOrder.save();
-
-        console.log('Order created successfully:', savedOrder._id);
-
-        // Update voucher usage with user tracking (after successful order creation)
-        if (appliedVoucher) {
-            try {
-                await Voucher.findOneAndUpdate(
-                    { code: appliedVoucher.code },
-                    {
-                        $inc: { usedCount: 1 },
-                        $push: {
-                            usedBy: {
-                                userId: userId,
-                                usedAt: new Date(),
-                                orderAmount: totalAmount,
-                                discountApplied: finalDiscount
-                            }
-                        }
-                    }
-                );
-                console.log('Voucher usage tracking updated successfully');
-            } catch (voucherUpdateError) {
-                console.error('Error updating voucher usage tracking:', voucherUpdateError);
-                // Log error but don't fail the order
-            }
+        if (user.email) {
+            userEmail = user.email;
+            userName = user.name || user.firstName || address.fullName;
+        } else if (user.emailAddresses && user.emailAddresses.length > 0) {
+            userEmail = user.emailAddresses[0].emailAddress;
+            userName = user.firstName && user.lastName 
+                ? `${user.firstName} ${user.lastName}` 
+                : user.firstName || address.fullName;
         }
 
-        // 🎯 SEND ORDER CONFIRMATION EMAIL
-        try {
-            // Get user email - try multiple sources
-            let userEmail = null;
-            let userName = null;
+        // Generate temporary order ID for tracking
+        const tempOrderId = `temp_${userId}_${Date.now()}`;
 
-            // Method 1: Check if user has email field in database
-            if (user.email) {
-                userEmail = user.email;
-                userName = user.name || user.firstName || address.fullName;
-            } 
-            // Method 2: Check if user has emailAddresses array (Clerk format)
-            else if (user.emailAddresses && user.emailAddresses.length > 0) {
-                userEmail = user.emailAddresses[0].emailAddress;
-                userName = user.firstName && user.lastName 
-                    ? `${user.firstName} ${user.lastName}` 
-                    : user.firstName || address.fullName;
-            }
-            // Method 3: If using Clerk, you might need to fetch from Clerk API
-            // This would require additional Clerk setup
-
-            if (userEmail) {
-                console.log(`Sending order confirmation email to: ${userEmail}`);
-                
-                const emailResult = await sendOrderConfirmationEmail(
-                    savedOrder, 
-                    userEmail, 
-                    userName
-                );
-                
-                if (emailResult.success) {
-                    console.log('✅ Order confirmation email sent successfully');
-                } else {
-                    console.error('❌ Failed to send order confirmation email:', emailResult.error);
-                }
-            } else {
-                console.log('⚠️  No email address found for user, skipping email notification');
-                console.log('User object:', JSON.stringify(user, null, 2));
-            }
-        } catch (emailError) {
-            console.error('❌ Error in email sending process:', emailError);
-            // Don't fail the order if email fails - just log the error
-        }
-
-        // Send to Inngest
+        // 🚀 SEND TO INNGEST FOR COMPLETE ORDER CREATION (NO ORDER CREATION HERE)
         try {
             await inngest.send({
-                name: "order/created",
+                id: `create-order-${tempOrderId}`, // Unique deduplication ID
+                name: "order/create",
                 data: {
+                    tempOrderId,
                     userId,
-                    orderId: savedOrder._id.toString(),
                     items: validatedItems,
                     amount: finalAmount,
                     subtotal: totalAmount,
@@ -366,50 +292,49 @@ export async function POST(request) {
                     discount: finalDiscount,
                     promoCode: promoCode || null,
                     appliedVoucher: appliedVoucher,
+                    voucherCode: appliedVoucher?.code || null,
                     address,
+                    status: "Order Placed",
+                    paymentMethod: "COD",
+                    payment: false,
                     date: Date.now(),
-                    // Add email info for Inngest processing
-                    userEmail: user.email || user.emailAddresses?.[0]?.emailAddress || null,
-                    userName: user.name || user.firstName || address.fullName
+                    // User info for emails
+                    userEmail: userEmail,
+                    userName: userName
                 },
             });
-            console.log('Inngest event sent successfully');
-        } catch (inngestError) {
-            console.error('Inngest error:', inngestError);
-            // Don't fail order if Inngest fails
-        }
 
-        // Clear user cart
-        try {
-            await User.findByIdAndUpdate(userId, {
-                $unset: { cartItems: 1 }
+            console.log('✅ Order creation request sent to Inngest');
+
+            // Return immediate response - order will be created by Inngest
+            return NextResponse.json({
+                success: true, 
+                message: "Order is being processed",
+                tempOrderId: tempOrderId,
+                orderNumber: tempOrderId.slice(-8).toUpperCase(),
+                amount: finalAmount,
+                subtotal: totalAmount,
+                deliveryFee: deliveryFee,
+                discount: finalDiscount,
+                appliedVoucher: appliedVoucher,
+                items: validatedItems.length,
+                status: "processing",
+                emailSent: userEmail ? true : false
             });
-            console.log('User cart cleared successfully');
-        } catch (cartError) {
-            console.error('Cart clear error:', cartError);
-            // Don't fail order if cart clearing fails
-        }
 
-        return NextResponse.json({
-            success: true, 
-            message: "Order placed successfully",
-            orderId: savedOrder._id,
-            orderNumber: savedOrder._id.toString().slice(-8).toUpperCase(),
-            amount: finalAmount,
-            subtotal: totalAmount,
-            deliveryFee: deliveryFee,
-            discount: finalDiscount,
-            appliedVoucher: appliedVoucher,
-            items: validatedItems.length,
-            // Optional: Include email status in response
-            emailSent: user.email || user.emailAddresses?.[0]?.emailAddress ? true : false
-        });
+        } catch (inngestError) {
+            console.error('❌ Inngest error:', inngestError);
+            return NextResponse.json({
+                success: false,
+                message: "Failed to process order. Please try again."
+            }, { status: 500 });
+        }
 
     } catch (error) {
-        console.error("Order creation error:", error);
+        console.error("Order processing error:", error);
         return NextResponse.json({
             success: false, 
-            message: error.message || "Failed to create order"
+            message: error.message || "Failed to process order"
         }, { status: 500 });
     }
 }

@@ -1,26 +1,15 @@
 import { serve } from "inngest/next";
-import { 
-  inngest,
-  createUserOrder,
-  syncUserCreation,
-  syncUserUpdate,
-  syncUserDeletion,
-  handleOrderStatusUpdate,
-  handleOrderCancellation,
-} from "@/config/inngest";
+import { inngest, syncUserCreation, syncUserUpdate, syncUserDeletion, createOrder, processOrderCreated, handleOrderStatusUpdate, handleOrderCancellation } from "@/config/inngest";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
-    // User management functions
     syncUserCreation,
-    syncUserUpdate,
+    syncUserUpdate, 
     syncUserDeletion,
-    
-    // Order management functions
-    createUserOrder,
+    createOrder,
+    processOrderCreated,
     handleOrderStatusUpdate,
-    handleOrderCancellation,
-
+    handleOrderCancellation
   ],
 });
