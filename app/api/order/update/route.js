@@ -2,13 +2,14 @@
 import { getAuth } from "@clerk/nextjs/server";
 import connectDB from "@/config/db";
 import Order from "@/models/order";
+import User from "@/models/user";
 import { inngest } from "@/config/inngest";
+import { sendOrderStatusUpdateEmail } from "@/lib/emailService";
 import { NextResponse } from "next/server";
 
 export async function PUT(request) {
     try {
-        console.log('=== ORDER UPDATE API CALLED ===');
-        
+
         const { userId } = getAuth(request);
         const body = await request.json();
         const { 
@@ -23,7 +24,7 @@ export async function PUT(request) {
             cancellationReason
         } = body;
 
-        console.log('Update request:', { orderId, status, payment, courier, trackingId });
+    
 
         if (!userId) {
             return NextResponse.json(
@@ -49,6 +50,9 @@ export async function PUT(request) {
                 { status: 404 }
             );
         }
+
+        // Store original status for email comparison
+        const originalStatus = order.status;
 
         // Prepare update data
         const updateData = {};
@@ -76,6 +80,12 @@ export async function PUT(request) {
                 statusHistoryEntry.note = `Order cancelled: ${cancellationReason || 'Cancelled by admin'}`;
             } else if (status === 'Shipped') {
                 statusHistoryEntry.note = `Order shipped${courier ? ` via ${courier}` : ''}${trackingId ? ` (Tracking: ${trackingId})` : ''}`;
+            } else if (status === 'Processing') {
+                statusHistoryEntry.note = 'Order is being processed';
+            } else if (status === 'Packed') {
+                statusHistoryEntry.note = 'Order has been packed and ready for shipping';
+            } else if (status === 'Out for Delivery') {
+                statusHistoryEntry.note = 'Order is out for delivery';
             }
         }
 
@@ -118,22 +128,130 @@ export async function PUT(request) {
             { new: true }
         );
 
-        console.log('Order updated successfully:', updatedOrder._id);
+
+        // 🎯 SEND STATUS UPDATE EMAIL (Only for status changes)
+        if (status && status !== originalStatus) {
+            try {
+                // Get user details for email
+                const customerUser = await User.findById(order.userId);
+                
+                if (customerUser) {
+                    // Get user email - try multiple sources
+                    let userEmail = null;
+                    let userName = null;
+
+                    // Method 1: Check if user has email field in database
+                    if (customerUser.email) {
+                        userEmail = customerUser.email;
+                        userName = customerUser.name || customerUser.firstName || 'Valued Customer';
+                    } 
+                    // Method 2: Check if user has emailAddresses array (Clerk format)
+                    else if (customerUser.emailAddresses && customerUser.emailAddresses.length > 0) {
+                        userEmail = customerUser.emailAddresses[0].emailAddress;
+                        userName = customerUser.firstName && customerUser.lastName 
+                            ? `${customerUser.firstName} ${customerUser.lastName}` 
+                            : customerUser.firstName || 'Valued Customer';
+                    }
+
+                    if (userEmail) {
+                 
+                        // 🔥 CORRECTED: Pass parameters in the right order
+                        // Template expects: (order, user, oldStatus, newStatus)
+                        const emailResult = await sendOrderStatusUpdateEmail(
+                            updatedOrder,           // order object
+                            {                       // user object
+                                name: userName,
+                                email: userEmail,
+                                firstName: customerUser.firstName,
+                                lastName: customerUser.lastName
+                            },
+                            originalStatus,         // oldStatus
+                            status                  // newStatus
+                        );
+                        
+                        if (emailResult.success) {
+                            console.log('✅ Order status update email sent successfully');
+                        } else {
+                            console.error('❌ Failed to send status update email:', emailResult.error);
+                        }
+                    } else {
+                        console.log('⚠️  No email address found for customer, skipping email notification');
+                        console.log('Customer user data:', JSON.stringify(customerUser, null, 2));
+                    }
+                } else {
+                    console.log('⚠️  Customer user not found, skipping email notification');
+                }
+            } catch (emailError) {
+                console.error('❌ Error in status update email process:', emailError);
+                // Don't fail the update if email fails - just log the error
+            }
+        }
+
+        // 🎯 SEND EMAIL FOR PAYMENT STATUS CHANGES TOO
+        if (typeof payment === 'boolean' && payment !== order.payment && payment === true) {
+            try {
+                // Get user details for payment confirmation email
+                const customerUser = await User.findById(order.userId);
+                
+                if (customerUser) {
+                    let userEmail = null;
+                    let userName = null;
+
+                    if (customerUser.email) {
+                        userEmail = customerUser.email;
+                        userName = customerUser.name || customerUser.firstName || 'Valued Customer';
+                    } else if (customerUser.emailAddresses && customerUser.emailAddresses.length > 0) {
+                        userEmail = customerUser.emailAddresses[0].emailAddress;
+                        userName = customerUser.firstName && customerUser.lastName 
+                            ? `${customerUser.firstName} ${customerUser.lastName}` 
+                            : customerUser.firstName || 'Valued Customer';
+                    }
+
+                    if (userEmail) {
+                        console.log(`💰 Sending payment confirmation email to: ${userEmail}`);
+                        
+                        // Send payment confirmation as status update
+                        const emailResult = await sendOrderStatusUpdateEmail(
+                            updatedOrder,
+                            {
+                                name: userName,
+                                email: userEmail,
+                                firstName: customerUser.firstName,
+                                lastName: customerUser.lastName
+                            },
+                            'Payment Pending',
+                            'Payment Confirmed'
+                        );
+                        
+                        if (emailResult.success) {
+                            console.log('✅ Payment confirmation email sent successfully');
+                        } else {
+                            console.error('❌ Failed to send payment confirmation email:', emailResult.error);
+                        }
+                    }
+                }
+            } catch (emailError) {
+                console.error('❌ Error in payment confirmation email process:', emailError);
+            }
+        }
 
         // Send Inngest event for status changes
-        if (status && status !== order.status) {
+        if (status && status !== originalStatus) {
             try {
                 await inngest.send({
                     name: "order/status-updated",
                     data: {
                         orderId: orderId,
-                        oldStatus: order.status,
+                        oldStatus: originalStatus,
                         newStatus: status,
                         userId: order.userId,
                         updatedBy: userId,
                         courier: courier || null,
                         trackingId: trackingId || null,
-                        date: Date.now()
+                        date: Date.now(),
+                        orderAmount: order.amount,
+                        customerEmail: null,
+                        items: order.items
                     },
                 });
                 console.log('Status update event sent to Inngest');
@@ -145,7 +263,10 @@ export async function PUT(request) {
         return NextResponse.json({
             success: true,
             message: "Order updated successfully",
-            order: updatedOrder
+            order: updatedOrder,
+            statusChanged: status && status !== originalStatus,
+            paymentChanged: typeof payment === 'boolean' && payment !== order.payment,
+            emailSent: (status && status !== originalStatus) || (typeof payment === 'boolean' && payment !== order.payment && payment === true)
         });
 
     } catch (error) {

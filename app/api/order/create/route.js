@@ -5,15 +5,14 @@ import Order from "@/models/order";
 import Product from "@/models/product";
 import Voucher from "@/models/voucher";
 import { inngest } from "@/config/inngest";
+import { sendOrderConfirmationEmail } from "@/lib/emailService";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
     try {
-        
         const { userId } = getAuth(request);
         const body = await request.json();
         const { items, address, promoCode, discount, subtotal } = body;
-
 
         if (!userId) {
             return NextResponse.json(
@@ -106,11 +105,8 @@ export async function POST(request) {
             );
         }
 
-
-
         // Calculate delivery fee
         const deliveryFee = totalAmount > 500 ? 0 : 50;
-
 
         // Enhanced voucher validation and discount calculation
         let finalDiscount = 0;
@@ -138,7 +134,6 @@ export async function POST(request) {
                         // Check user-specific usage limit
                         const userUsageCount = voucher.usedBy.filter(usage => usage.userId === userId).length;
                       
-                        
                         if (userUsageCount < voucher.userUsageLimit) {
                             
                             // Check order amount limits
@@ -313,6 +308,50 @@ export async function POST(request) {
             }
         }
 
+        // 🎯 SEND ORDER CONFIRMATION EMAIL
+        try {
+            // Get user email - try multiple sources
+            let userEmail = null;
+            let userName = null;
+
+            // Method 1: Check if user has email field in database
+            if (user.email) {
+                userEmail = user.email;
+                userName = user.name || user.firstName || address.fullName;
+            } 
+            // Method 2: Check if user has emailAddresses array (Clerk format)
+            else if (user.emailAddresses && user.emailAddresses.length > 0) {
+                userEmail = user.emailAddresses[0].emailAddress;
+                userName = user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}` 
+                    : user.firstName || address.fullName;
+            }
+            // Method 3: If using Clerk, you might need to fetch from Clerk API
+            // This would require additional Clerk setup
+
+            if (userEmail) {
+                console.log(`Sending order confirmation email to: ${userEmail}`);
+                
+                const emailResult = await sendOrderConfirmationEmail(
+                    savedOrder, 
+                    userEmail, 
+                    userName
+                );
+                
+                if (emailResult.success) {
+                    console.log('✅ Order confirmation email sent successfully');
+                } else {
+                    console.error('❌ Failed to send order confirmation email:', emailResult.error);
+                }
+            } else {
+                console.log('⚠️  No email address found for user, skipping email notification');
+                console.log('User object:', JSON.stringify(user, null, 2));
+            }
+        } catch (emailError) {
+            console.error('❌ Error in email sending process:', emailError);
+            // Don't fail the order if email fails - just log the error
+        }
+
         // Send to Inngest
         try {
             await inngest.send({
@@ -328,7 +367,10 @@ export async function POST(request) {
                     promoCode: promoCode || null,
                     appliedVoucher: appliedVoucher,
                     address,
-                    date: Date.now()
+                    date: Date.now(),
+                    // Add email info for Inngest processing
+                    userEmail: user.email || user.emailAddresses?.[0]?.emailAddress || null,
+                    userName: user.name || user.firstName || address.fullName
                 },
             });
             console.log('Inngest event sent successfully');
@@ -358,7 +400,9 @@ export async function POST(request) {
             deliveryFee: deliveryFee,
             discount: finalDiscount,
             appliedVoucher: appliedVoucher,
-            items: validatedItems.length
+            items: validatedItems.length,
+            // Optional: Include email status in response
+            emailSent: user.email || user.emailAddresses?.[0]?.emailAddress ? true : false
         });
 
     } catch (error) {

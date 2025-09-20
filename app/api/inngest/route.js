@@ -1,17 +1,26 @@
 import { serve } from "inngest/next";
-import { createUserOrder, inngest } from "@/config/inngest"; // This should export the Inngest client instance
-import {
+import { 
+  inngest,
+  createUserOrder,
   syncUserCreation,
   syncUserUpdate,
   syncUserDeletion,
-} from "@/config/inngest"; // Adjust path if needed
+  handleOrderStatusUpdate,
+  handleOrderCancellation,
+} from "@/config/inngest";
 
-export const { GET, POST ,PUT } = serve({
+export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
+    // User management functions
     syncUserCreation,
     syncUserUpdate,
     syncUserDeletion,
-    createUserOrder
+    
+    // Order management functions
+    createUserOrder,
+    handleOrderStatusUpdate,
+    handleOrderCancellation,
+
   ],
 });
