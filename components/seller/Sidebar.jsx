@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Icons
@@ -31,7 +30,6 @@ import {
 
 const SideBar = () => {
   const pathname = usePathname();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menuItems = [
@@ -83,7 +81,6 @@ const SideBar = () => {
       icon: UserPlus,
       badge: null
     },
-
   ];
 
   const handleToggleCollapse = useCallback((e) => {
@@ -92,25 +89,18 @@ const SideBar = () => {
     setIsCollapsed(prev => !prev);
   }, []);
 
-  const handleMobileMenuClick = useCallback(() => {
-    setIsMobileOpen(false);
-  }, []);
-
-  const SidebarItem = ({ item, collapsed = false, mobile = false }) => {
+  const SidebarItem = ({ item, isMobile = false }) => {
     const isActive = pathname === item.path;
     const IconComponent = item.icon;
+    const collapsed = isMobile || isCollapsed;
 
     const content = (
-      <Link 
-        href={item.path}
-        onClick={mobile ? handleMobileMenuClick : undefined}
-        className="block w-full"
-      >
+      <Link href={item.path} className="block w-full">
         <motion.div
           whileHover={{ scale: collapsed ? 1.05 : 1.02 }}
           whileTap={{ scale: 0.98 }}
           className={`
-            flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+            flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 relative
             ${isActive 
               ? 'bg-primary text-primary-foreground shadow-sm' 
               : 'hover:bg-accent hover:text-accent-foreground text-muted-foreground hover:text-foreground'
@@ -133,11 +123,16 @@ const SideBar = () => {
               )}
             </>
           )}
+
+          {/* Badge indicator for mobile when collapsed */}
+          {collapsed && item.badge && (
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+          )}
         </motion.div>
       </Link>
     );
 
-    if (collapsed && !mobile) {
+    if (collapsed) {
       return (
         <TooltipProvider>
           <Tooltip>
@@ -162,114 +157,104 @@ const SideBar = () => {
     return content;
   };
 
-  const SidebarContent = ({ collapsed = false, mobile = false }) => (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className={`p-4 border-b ${collapsed ? 'px-3' : ''}`}>
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
-            <Store className="w-4 h-4 text-primary-foreground" />
+  const SidebarContent = ({ isMobile = false }) => {
+    const collapsed = isMobile || isCollapsed;
+    
+    return (
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className={`p-4 border-b ${collapsed ? 'px-3' : ''}`}>
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+              <Store className="w-4 h-4 text-primary-foreground" />
+            </div>
+            
+            {!collapsed && (
+              <div>
+                <h2 className="font-semibold text-base">Admin Panel</h2>
+                <p className="text-xs text-muted-foreground">Manage your store</p>
+              </div>
+            )}
           </div>
-          
-          {!collapsed && (
-            <div>
-              <h2 className="font-semibold text-base">Admin Panel</h2>
-              <p className="text-xs text-muted-foreground">Manage your store</p>
+        </div>
+
+        {/* Navigation */}
+        <ScrollArea className="flex-1 px-3 py-4">
+          <div className="space-y-2">
+            {menuItems.map((item, index) => (
+              <SidebarItem 
+                key={item.path} 
+                item={item} 
+                isMobile={isMobile}
+              />
+            ))}
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        <div className={`p-3 border-t ${collapsed ? 'px-2' : ''}`}>
+          {!collapsed ? (
+            <div className="bg-muted/50 rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <motion.div 
+                  className="w-2 h-2 bg-green-500 rounded-full"
+                  animate={{ 
+                    opacity: [0.4, 1, 0.4]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                <span className="text-xs font-medium">Online</span>
+              </div>
+              <p className="text-xs text-muted-foreground">System operational</p>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.div 
+                      className="w-3 h-3 bg-green-500 rounded-full"
+                      animate={{ 
+                        opacity: [0.4, 1, 0.4]
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    System Online
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
         </div>
       </div>
-
-      {/* Navigation */}
-      <ScrollArea className="flex-1 px-3 py-4">
-        <div className="space-y-2">
-          {menuItems.map((item, index) => (
-            <SidebarItem 
-              key={item.path} 
-              item={item} 
-              collapsed={collapsed} 
-              mobile={mobile}
-            />
-          ))}
-        </div>
-      </ScrollArea>
-
-      {/* Footer */}
-      <div className={`p-3 border-t ${collapsed ? 'px-2' : ''}`}>
-        {!collapsed ? (
-          <div className="bg-muted/50 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <motion.div 
-                className="w-2 h-2 bg-green-500 rounded-full"
-                animate={{ 
-                  opacity: [0.4, 1, 0.4]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <span className="text-xs font-medium">Online</span>
-            </div>
-            <p className="text-xs text-muted-foreground">System operational</p>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <motion.div 
-                    className="w-3 h-3 bg-green-500 rounded-full"
-                    animate={{ 
-                      opacity: [0.4, 1, 0.4]
-                    }}
-                    transition={{ 
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  />
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  System Online
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <div className="lg:hidden">
-        <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="fixed top-4 left-4 z-50 shadow-lg"
-            >
-              <Menu className="w-4 h-4" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-80 p-0">
-            <SidebarContent mobile={true} />
-          </SheetContent>
-        </Sheet>
+      {/* Mobile Sidebar - Takes part of screen, not overlay */}
+      <div className="lg:hidden w-16 bg-card border-r shadow-sm h-screen flex-shrink-0">
+        <SidebarContent isMobile={true} />
       </div>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block relative">
+      <div className="hidden lg:block relative flex-shrink-0">
         <motion.div
           animate={{ width: isCollapsed ? '64px' : '288px' }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="border-r bg-card shadow-sm h-full relative"
+          className="border-r bg-card shadow-sm h-screen relative"
         >
-          <SidebarContent collapsed={isCollapsed} />
+          <SidebarContent />
           
           {/* Collapse Toggle Button */}
           <button

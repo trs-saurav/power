@@ -22,7 +22,9 @@ import {
   CreditCard,
   Truck,
   Receipt,
-  Loader2
+  Loader2,
+  X,
+  CheckCircle
 } from "lucide-react";
 
 const OrderSummary = () => {
@@ -32,6 +34,8 @@ const OrderSummary = () => {
   const [promoCode, setPromoCode] = useState("");
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [promoDiscount, setPromoDiscount] = useState(0);
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
 
   const fetchUserAddresses = async () => {
     try {
@@ -51,7 +55,8 @@ const OrderSummary = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error('Address fetch error:', error);
+      toast.error(error?.response?.data?.message || error.message || "Failed to fetch addresses");
     }
   };
 
@@ -60,17 +65,93 @@ const OrderSummary = () => {
     setSelectedAddress(address);
   };
 
-  const applyPromoCode = () => {
-    // Mock promo code logic - replace with your actual implementation
-    if (promoCode.toLowerCase() === "save10") {
-      setPromoDiscount(getCartAmount() * 0.1);
-      toast.success("Promo code applied! 10% discount added.");
-    } else if (promoCode.toLowerCase() === "free50") {
-      setPromoDiscount(50);
-      toast.success("Promo code applied! ₹50 discount added.");
-    } else if (promoCode) {
-      toast.error("Invalid promo code");
+  // Enhanced voucher application function
+  const applyPromoCode = async () => {
+    if (!promoCode || !promoCode.trim()) {
+      toast.error("Please enter a promo code");
+      return;
     }
+
+    if (promoDiscount > 0) {
+      toast.error("A promo code is already applied. Remove it first to apply a new one.");
+      return;
+    }
+
+    try {
+      setIsApplyingPromo(true);
+      
+      const cartAmount = getCartAmount();
+      
+      if (cartAmount <= 0) {
+        toast.error("Your cart is empty");
+        return;
+      }
+
+      console.log('Validating voucher:', promoCode);
+
+      // Call your voucher validation API
+      const response = await fetch('/api/admin/vouchers/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: promoCode.toUpperCase(),
+          orderAmount: cartAmount,
+          cartItems: cartItems
+        })
+      });
+
+      const data = await response.json();
+      console.log('Voucher validation response:', data);
+
+      if (data.success) {
+        // Apply the discount
+        setPromoDiscount(data.discountAmount);
+        setAppliedVoucher({
+          code: data.voucher.code,
+          title: data.voucher.title,
+          discountAmount: data.discountAmount,
+          finalAmount: data.finalAmount
+        });
+        
+        toast.success(`Promo code applied! You saved ${currency}${data.discountAmount.toLocaleString()}`);
+      } else {
+        // Handle specific error cases
+        switch (data.message) {
+          case "Invalid voucher code":
+            toast.error("Invalid promo code. Please check and try again.");
+            break;
+          case "Voucher has expired or not yet active":
+            toast.error("This promo code has expired or is not yet active.");
+            break;
+          case "Voucher usage limit exceeded":
+            toast.error("This promo code has reached its usage limit.");
+            break;
+          case "You have already used this voucher":
+            toast.error("You have already used this promo code.");
+            break;
+          case "Order amount is below minimum requirement":
+            toast.error(`Minimum order amount of ${currency}${data.minAmount} required for this promo code.`);
+            break;
+          default:
+            toast.error(data.message || "Failed to apply promo code");
+        }
+      }
+    } catch (error) {
+      console.error('Promo code error:', error);
+      toast.error("Network error. Please try again.");
+    } finally {
+      setIsApplyingPromo(false);
+    }
+  };
+
+  // Function to remove applied promo code
+  const removePromoCode = () => {
+    setPromoCode("");
+    setPromoDiscount(0);
+    setAppliedVoucher(null);
+    toast.success("Promo code removed");
   };
 
   const createOrder = async () => {
@@ -97,8 +178,10 @@ const OrderSummary = () => {
       const response = await axios.post('/api/order/create', {
         items: cartItemArray,
         address: selectedAddress._id,
-        promoCode: promoCode || null,
-        discount: promoDiscount
+        promoCode: appliedVoucher?.code || null,
+        discount: promoDiscount,
+        subtotal: getCartAmount(),
+        total: getCartAmount() + (getCartAmount() > 500 ? 0 : 50) - promoDiscount
       }, {
         headers: {
           'Content-Type': 'application/json'
@@ -110,6 +193,12 @@ const OrderSummary = () => {
       if (data.success) {
         toast.success(data.message);
         setCartItems({});
+        
+        // Clear applied voucher after successful order
+        setAppliedVoucher(null);
+        setPromoDiscount(0);
+        setPromoCode("");
+        
         router.push('/order-placed');
       } else {
         toast.error(data.message || "Failed to create order");
@@ -138,9 +227,10 @@ const OrderSummary = () => {
     }
   }, [user]);
 
+  // Calculate totals (removed tax)
   const subtotal = getCartAmount();
-  const tax = Math.floor(subtotal * 0.02);
-  const total = subtotal + tax - promoDiscount;
+  const deliveryFee = subtotal > 500 ? 0 : 50; // Free delivery above ₹500
+  const total = Math.max(0, subtotal + deliveryFee - promoDiscount);
 
   return (
     <motion.div
@@ -210,42 +300,62 @@ const OrderSummary = () => {
 
           <Separator />
 
-          {/* Promo Code */}
+          {/* Enhanced Promo Code Section */}
           <div className="space-y-3">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <Tag className="w-4 h-4" />
               Promo Code
             </Label>
             
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter promo code"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                className="flex-1"
-              />
-              <Button 
-                variant="outline" 
-                onClick={applyPromoCode}
-                disabled={!promoCode.trim()}
-              >
-                Apply
-              </Button>
-            </div>
-            
-            {promoDiscount > 0 && (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-green-700 bg-green-100">
-                  <Tag className="w-3 h-3 mr-1" />
-                  {currency}{promoDiscount} discount applied
-                </Badge>
+            {!appliedVoucher ? (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  className="flex-1"
+                  disabled={isApplyingPromo}
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={applyPromoCode}
+                  disabled={!promoCode.trim() || isApplyingPromo}
+                >
+                  {isApplyingPromo ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    'Apply'
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <div>
+                      <p className="font-medium text-green-800">{appliedVoucher.code}</p>
+                      <p className="text-sm text-green-600">
+                        {appliedVoucher.title} - You saved {currency}{appliedVoucher.discountAmount.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={removePromoCode}
+                    className="text-green-600 hover:text-green-700 h-6 w-6 p-0"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
 
           <Separator />
 
-          {/* Order Details */}
+          {/* Order Details (Tax Removed) */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-3">
               <Receipt className="w-4 h-4" />
@@ -265,25 +375,23 @@ const OrderSummary = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground flex items-center gap-1">
                   <Truck className="w-3 h-3" />
-                  Shipping
+                  Delivery
                 </span>
-                <Badge variant="secondary" className="text-green-700 bg-green-100">
-                  Free
-                </Badge>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Tax (2%)
-                </span>
-                <span className="font-medium">
-                  {currency}{tax.toLocaleString()}
-                </span>
+                {deliveryFee === 0 ? (
+                  <Badge variant="secondary" className="text-green-700 bg-green-100">
+                    Free
+                  </Badge>
+                ) : (
+                  <span className="font-medium">
+                    {currency}{deliveryFee}
+                  </span>
+                )}
               </div>
               
               {promoDiscount > 0 && (
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-green-600">
+                  <span className="text-sm text-green-600 flex items-center gap-1">
+                    <Tag className="w-3 h-3" />
                     Promo Discount
                   </span>
                   <span className="font-medium text-green-600">
@@ -301,6 +409,14 @@ const OrderSummary = () => {
                 {currency}{total.toLocaleString()}
               </span>
             </div>
+            
+            {promoDiscount > 0 && (
+              <div className="text-center">
+                <Badge variant="secondary" className="text-green-700 bg-green-100">
+                  You saved {currency}{promoDiscount.toLocaleString()} with {appliedVoucher?.code}!
+                </Badge>
+              </div>
+            )}
           </div>
 
           <Separator />
@@ -321,7 +437,7 @@ const OrderSummary = () => {
               ) : (
                 <>
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Place Order
+                  Place Order ({currency}{total.toLocaleString()})
                 </>
               )}
             </Button>
