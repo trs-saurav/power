@@ -462,14 +462,14 @@ const EditProduct = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Battery">Battery</SelectItem>
-                        <SelectItem value="Earphone">Earphone</SelectItem>
-                        <SelectItem value="Headphone">Headphone</SelectItem>
-                        <SelectItem value="Watch">Watch</SelectItem>
-                        <SelectItem value="Smartphone">Smartphone</SelectItem>
-                        <SelectItem value="Laptop">Laptop</SelectItem>
-                        <SelectItem value="Camera">Camera</SelectItem>
-                        <SelectItem value="Accessories">Accessories</SelectItem>
+                        <SelectItem value="BATTERY">BATTERY</SelectItem>
+                                                <SelectItem value="UPS">UPS</SelectItem>
+                                                <SelectItem value="STABILIZER">STABILIZER</SelectItem>
+                                         <SelectItem value="SOLAR">SOLAR</SelectItem>
+                                                <SelectItem value="CCTV">CCTV</SelectItem>
+                                                <SelectItem value="OTHERS">OTHERS</SelectItem>
+                                                <SelectItem value="Camera">Camera</SelectItem>
+                                                <SelectItem value="Accessories">Accessories</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

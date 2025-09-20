@@ -1,6 +1,5 @@
 "use client"
 import { useEffect, useState } from "react";
-import { assets } from "@/assets/assets";
 import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
 import { useParams } from "next/navigation";

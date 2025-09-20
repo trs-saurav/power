@@ -1,5 +1,4 @@
 'use client'
-import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -28,7 +27,8 @@ import {
   ArrowLeft,
   Loader2,
   Save,
-  Navigation
+  Navigation,
+  Locate
 } from "lucide-react";
 
 const AddAddress = () => {
@@ -363,12 +363,7 @@ const AddAddress = () => {
                         <Card className="overflow-hidden">
                             <CardContent className="p-0">
                                 <div className="relative">
-                                    <Image
-                                        src={assets.my_location_image}
-                                        alt="Location illustration"
-                                        className="w-full h-auto object-cover"
-                                        priority
-                                    />
+                                    <Locate className="w-full h-auto object-cover"/>
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                                     <div className="absolute bottom-6 left-6 text-white">
                                         <h3 className="text-xl font-semibold mb-2">Quick & Easy Delivery</h3>

@@ -1,6 +1,5 @@
 'use client'
 import React, { useState } from "react";
-import { assets } from "@/assets/assets";
 import OrderSummary from "@/components/OrderSummary";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";

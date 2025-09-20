@@ -16,7 +16,6 @@ const orderSchema = new mongoose.Schema({
                 type: Number,
                 required: true
             },
-            // Optional: Add these fields for better order tracking
             name: String,
             image: String,
             price: Number,
@@ -27,7 +26,6 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    // Add voucher and pricing breakdown fields
     subtotal: {
         type: Number,
         required: true
@@ -58,7 +56,17 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        default: "Order Placed", // Changed from "Pending" to match your API
+        enum: [
+            "Order Placed",
+            "Processing",
+            "Packed",
+            "Shipped",
+            "Out for Delivery",
+            "Delivered",
+            "Cancelled",
+            "Refunded"
+        ],
+        default: "Order Placed",
         required: true
     },
     paymentMethod: {
@@ -69,11 +77,57 @@ const orderSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    // New tracking fields
+    courier: {
+        name: {
+            type: String,
+            default: null
+        },
+        trackingId: {
+            type: String,
+            default: null
+        },
+        trackingUrl: {
+            type: String,
+            default: null
+        }
+    },
+    // Status history for tracking
+    statusHistory: [{
+        status: String,
+        updatedAt: {
+            type: Date,
+            default: Date.now
+        },
+        updatedBy: String,
+        note: String
+    }],
+    // Cancellation details
+    cancellation: {
+        reason: String,
+        cancelledAt: Date,
+        cancelledBy: String,
+        refundStatus: {
+            type: String,
+            enum: ["Pending", "Processed", "Failed"],
+            default: null
+        }
+    },
     date: {
         type: Number,
         required: true,
-    }
-}, { timestamps: true }); // This adds createdAt and updatedAt automatically
+    },
+    // Delivery details
+    expectedDeliveryDate: Date,
+    actualDeliveryDate: Date,
+    // Admin notes
+    adminNotes: String
+}, { timestamps: true });
+
+// Indexes for better performance
+orderSchema.index({ userId: 1, status: 1 });
+orderSchema.index({ status: 1, date: -1 });
+orderSchema.index({ 'courier.trackingId': 1 });
 
 const Order = mongoose.models.order || mongoose.model("order", orderSchema);
 export default Order;

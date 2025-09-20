@@ -35,7 +35,7 @@ const SideBar = () => {
   const menuItems = [
     { 
       name: 'Overview', 
-      path: '/admin/dashboard', 
+      path: '/admin/', 
       icon: Home,
       badge: null
     },
@@ -43,11 +43,11 @@ const SideBar = () => {
       name: 'Analytics', 
       path: '/admin/analytics', 
       icon: BarChart3,
-      badge: "New"
+      badge: ""
     },
     { 
       name: 'Add Product', 
-      path: '/admin', 
+      path: '/admin/add-product', 
       icon: Plus,
       badge: null
     },
