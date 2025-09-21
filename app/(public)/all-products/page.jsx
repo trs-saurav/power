@@ -30,23 +30,7 @@ import {
   Plus
 } from "lucide-react";
 
-// app/(public)/all-products/page.jsx
-export const metadata = {
-  title: 'All Products - Power Electronics Patna',
-  description: 'Browse our complete range of UPS systems, solar panels, CCTV cameras, voltage stabilizers, and electrical accessories in Patna, Bihar.',
-  keywords: [
-    'electrical products ',
-    'UPS systems',
-    'solar panels ',
-    'CCTV cameras ',
-    'voltage stabilizers',
-    'power backup products'
-  ],
-  openGraph: {
-    title: 'All Electrical Products - Power Electronics Patna',
-    description: 'Complete range of electrical solutions including UPS, solar, CCTV, and power backup systems available in Patna.',
-  },
-};
+
 
 
 const AllProducts = () => {
