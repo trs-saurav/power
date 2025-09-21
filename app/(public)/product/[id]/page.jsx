@@ -178,12 +178,6 @@ const Product = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/category/${productData.category}`}>
-                  {productData.category}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
                 <BreadcrumbPage>{productData.name}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -344,7 +338,7 @@ const Product = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-row  gap-4">
               <Button 
                 variant="outline"
                 size="lg"

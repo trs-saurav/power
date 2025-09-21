@@ -169,7 +169,7 @@ const CirLogo = () => {
                         </div>
 
                         {/* Shine effect */}
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+                        {/* <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" /> */}
                       </div>
                     </motion.div>
                   ))}

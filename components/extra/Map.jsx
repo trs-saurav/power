@@ -1,14 +1,10 @@
 import React from 'react';
 
-
-
 const Map = ({ embedUrl }) => {
   return (
     <iframe
       src={embedUrl}
-      width='full'
-      height='full'
-      className='rounded-lg shadow-lg '
+      className='w-full h-full rounded-lg shadow-lg border-0'
       allowFullScreen
       loading="lazy"
       referrerPolicy="no-referrer-when-downgrade"

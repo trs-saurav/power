@@ -58,40 +58,12 @@ const Footer = () => {
               </Link>
 
               <p className="text-muted-foreground leading-relaxed max-w-md">
-                Leading provider of premium electrical solutions with over 30 years of experience. 
-                Trusted by 100,000+ customers for reliable power and security systems.
+                Leading provider of premium electrical solutions with over 25 years of experience. 
+                Trusted by 10,000+ customers for reliable power and security systems.
               </p>
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap gap-6">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-950/30 rounded-lg flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground">Certified</div>
-                    <div className="text-xs text-muted-foreground">ISO Standards</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-950/30 rounded-lg flex items-center justify-center">
-                    <Award className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground">30+ Years</div>
-                    <div className="text-xs text-muted-foreground">Experience</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-950/30 rounded-lg flex items-center justify-center">
-                    <Users className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground">100K+</div>
-                    <div className="text-xs text-muted-foreground">Customers</div>
-                  </div>
-                </div>
-              </div>
+             
             </div>
 
             {/* Quick Links */}
@@ -262,9 +234,7 @@ const Footer = () => {
                   &copy; {new Date().getFullYear()} Power Electronics. All rights reserved.
                 </p>
                 <p className="text-muted-foreground/80 text-xs mt-1 flex items-center justify-center sm:justify-start gap-2">
-                  Made with 
-                  <Heart className="w-3 h-3 text-red-500 fill-current" />
-                  by 
+                  Developed by 
                   <Link 
                     href="https://instagram.com/trs_saurav"
                     target="_blank"
@@ -283,7 +253,7 @@ const Footer = () => {
                   {[
                     { 
                       icon: Instagram, 
-                      href: "https://instagram.com/trs_saurav", 
+                      href: "https://instagram.com/powerele9", 
                       color: "hover:bg-pink-500",
                       name: "Instagram"
                     },

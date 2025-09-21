@@ -18,7 +18,9 @@ import {
   Sparkles,
   Package,
   ShoppingBag,
-  Settings
+  Settings,
+  Sun,
+  Moon
 } from "lucide-react";
 
 const Navbar = () => {
@@ -47,10 +49,10 @@ const Navbar = () => {
   const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/all-products", label: "Shop", icon: Store },
-    { href: "/aboutus", label: "About", icon: Info },
     { href: "/gallery", label: "Gallery", icon: Camera },
+    { href: "/services", label: "Services", icon: Settings },
     { href: "/contact-us", label: "Contact", icon: Phone },
-    { href: "/services", label: "Services", icon: Settings }
+    { href: "/aboutus", label: "About", icon: Info },
   ];
 
   return (
@@ -93,7 +95,7 @@ const Navbar = () => {
                   <Sparkles className="w-4 h-4 text-violet-500 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                 </div>
                 <p className="text-xs text-muted-foreground font-medium">
-                  Your Power Solutions Partner
+                  Powering Tomorrow, Today
                 </p>
               </div>
             </Link>
@@ -116,8 +118,25 @@ const Navbar = () => {
             {/* Right Section */}
             <div className="flex items-center gap-3">
               
-              {/* Theme Toggle */}
-              <div className="hidden md:block">
+              {/* Mobile Quick Actions - Shop and Theme Toggle */}
+              <div className="flex items-center gap-2 lg:hidden">
+                {/* Shop Button - Mobile */}
+                <Link
+                  href="/all-products"
+                  className="flex items-center justify-center w-10 h-10 bg-primary/10 hover:bg-primary/20 text-primary rounded-full transition-all duration-200 hover:scale-105"
+                  aria-label="Shop"
+                >
+                  <Store className="w-5 h-5" />
+                </Link>
+
+                {/* Theme Toggle - Mobile */}
+                <div className="flex items-center justify-center">
+                  <ModeToggle />
+                </div>
+              </div>
+
+              {/* Theme Toggle - Desktop */}
+              <div className="hidden lg:block">
                 <ModeToggle />
               </div>
 
@@ -134,11 +153,6 @@ const Navbar = () => {
                     }}
                   >
                     <UserButton.MenuItems>
-                      <UserButton.Action 
-                        label="Home" 
-                        labelIcon={<Home className="w-4 h-4" />} 
-                        onClick={() => router.push('/')} 
-                      />
                       <UserButton.Action 
                         label="Products" 
                         labelIcon={<Package className="w-4 h-4" />} 
@@ -206,17 +220,14 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Mobile Actions */}
+            {/* Mobile Actions Footer */}
             <div className="flex flex-col gap-3 pt-4 border-t border-border/50">
               
-              {/* Theme Toggle Mobile */}
-              <div className="px-4 py-2">
-                <ModeToggle />
-              </div>
+
 
               {/* User Section - Mobile */}
               {user ? (
-                <div className="flex items-center gap-3 px-4 py-3">
+                <div className="flex items-center gap-3 px-4 py-3 bg-accent/30 rounded-xl">
                   <UserButton 
                     appearance={{
                       elements: {
@@ -227,28 +238,35 @@ const Navbar = () => {
                   >
                     <UserButton.MenuItems>
                       <UserButton.Action 
-                        label="Home" 
-                        labelIcon={<Home className="w-4 h-4" />} 
-                        onClick={() => router.push('/')} 
-                      />
-                      <UserButton.Action 
                         label="Products" 
                         labelIcon={<Package className="w-4 h-4" />} 
-                        onClick={() => router.push('/all-products')} 
+                        onClick={() => {
+                          router.push('/all-products');
+                          closeMobileMenu();
+                        }} 
                       />
                       <UserButton.Action 
                         label="Cart" 
                         labelIcon={<ShoppingBag className="w-4 h-4" />} 
-                        onClick={() => router.push('/cart')} 
+                        onClick={() => {
+                          router.push('/cart');
+                          closeMobileMenu();
+                        }} 
                       />
                       <UserButton.Action 
                         label="Orders" 
                         labelIcon={<Store className="w-4 h-4" />} 
-                        onClick={() => router.push('/my-orders')} 
+                        onClick={() => {
+                          router.push('/my-orders');
+                          closeMobileMenu();
+                        }} 
                       />
                     </UserButton.MenuItems>
                   </UserButton>
-                  <span className="font-medium text-foreground">Account</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">My Account</span>
+                    <span className="text-xs text-muted-foreground">Manage your profile</span>
+                  </div>
                 </div>
               ) : (
                 <button 
@@ -256,10 +274,10 @@ const Navbar = () => {
                     openSignIn();
                     closeMobileMenu();
                   }} 
-                  className="flex items-center gap-3 px-4 py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-all duration-200"
+                  className="flex items-center justify-center gap-3 px-4 py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-all duration-200"
                 >
                   <User className="w-5 h-5" />
-                  Sign In
+                  Sign In to Continue
                 </button>
               )}
             </div>
@@ -268,7 +286,7 @@ const Navbar = () => {
       </nav>
 
       {/* Spacer to prevent content from hiding behind fixed navbar */}
-      <div className="m-3"></div>
+      <div className="h-16 lg:h-20"></div>
     </>
   );
 };
