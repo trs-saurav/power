@@ -48,6 +48,47 @@ import {
   Link
 } from "lucide-react";
 
+
+// app/(public)/product/[id]/page.jsx
+// app/(public)/product/[id]/page.jsx
+export async function generateMetadata({ params }) {
+  const product = await getProduct(params.id);
+  
+  return {
+    title: `${product.name} - Power Electronics Patna`,
+    description: `${product.description.substring(0, 140)} Available at Power Electronics, Patna's trusted electrical solutions provider.`,
+    keywords: [
+      product.name,
+      product.category,
+      `${product.category} Patna`,
+      'power electronics',
+      product.brand
+    ],
+    openGraph: {
+      title: `${product.name} - Power Electronics`,
+      description: product.description,
+      images: [
+        {
+          url: product.images[0],
+          width: 800,
+          height: 600,
+          alt: `${product.name} - Power Electronics Patna`,
+        },
+      ],
+      type: 'product',
+      locale: 'en_IN',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} - Power Electronics`,
+      description: product.description.substring(0, 160),
+      images: [product.images[0]],
+    },
+  };
+}
+
+
+
 const Product = () => {
   const { id } = useParams();
   const { products, router, addToCart } = useAppContext();
