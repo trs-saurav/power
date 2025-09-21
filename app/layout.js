@@ -83,11 +83,7 @@ export const metadata = {
       'hi-IN': 'https://powerele.shop/hi', // If you plan to add Hindi version
     },
   },
-  verification: {
-    google: 'your-google-verification-code', // Replace with actual code
-    yandex: 'your-yandex-verification-code', // Optional
-    bing: 'your-bing-verification-code', // Optional
-  },
+
   category: 'electronics',
   classification: 'business',
   other: {
