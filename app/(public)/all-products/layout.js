@@ -2,10 +2,10 @@
 
 export const metadata = {
   title: {
-    default: 'All Products - Power Electronics Patna',
-    template: '%s - Power Electronics Patna'
+    default: 'Shop - Power Electronics',
+    template: '%s  - Shop', // keep a single, clean suffix
   },
-  description: 'Browse our complete range of UPS systems, solar panels, CCTV cameras, voltage stabilizers, and electrical accessories in Patna, Bihar. Quality electrical solutions with warranty.',
+  description: 'Browse UPS systems, solar panels, CCTV, voltage stabilizers, and electrical accessories in Patna, Bihar with warranty and expert support.',
   keywords: [
     'electrical products Patna',
     'UPS systems Bihar',
@@ -19,8 +19,8 @@ export const metadata = {
     'power electronics shop'
   ],
   openGraph: {
-    title: 'All Electrical Products - Power Electronics Patna',
-    description: 'Complete range of electrical solutions including UPS, solar, CCTV, and power backup systems available in Patna with 30+ years experience.',
+    title: 'Shop - All Products',
+    description: 'Complete range of electrical solutions including UPS, solar, CCTV, and power backup systems in Patna with 30+ years experience.',
     url: 'https://powerele.shop/all-products',
     siteName: 'Power Electronics',
     images: [
@@ -28,7 +28,7 @@ export const metadata = {
         url: '/products-gallery.jpg',
         width: 1200,
         height: 630,
-        alt: 'Power Electronics - All Electrical Products in Patna',
+        alt: 'All Electrical Products - Power Electronics Shop',
       },
     ],
     type: 'website',
@@ -36,8 +36,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'All Electrical Products - Power Electronics Patna',
-    description: 'Complete range of UPS, solar, CCTV systems and electrical accessories in Patna, Bihar.',
+    title: 'Shop - All Products',
+    description: 'UPS, solar, CCTV and electrical accessories in Patna, Bihar.',
     images: ['/products-gallery.jpg'],
   },
   alternates: {
@@ -53,33 +53,30 @@ export const metadata = {
       'max-snippet': -1,
     },
   },
-};
+}
 
-// Optional: Add structured data for product catalog
+// Valid CollectionPage + ItemList JSON‑LD
 const productCatalogSchema = {
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  "name": "Electrical Products - Power Electronics",
-  "description": "Complete range of electrical products including UPS, solar, CCTV systems in Patna, Bihar",
-  "url": "https://powerele.shop/all-products",
-  "mainEntity": {
-    "@type": "ItemList",
-    "name": "Electrical Products",
-    
-  }
-};
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Shop – All Products',
+  description: 'Electrical products catalog including UPS, solar, CCTV, stabilizers and accessories.',
+  url: 'https://powerele.shop/all-products',
+  mainEntity: {
+    '@type': 'ItemList',
+    name: 'Electrical Products',
+    itemListElement: [], // optional: you can inject category links here if you want
+  },
+}
 
 export default function AllProductsLayout({ children }) {
   return (
     <>
-      {/* Add structured data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productCatalogSchema) }}
       />
-      
-      {/* Render child pages */}
       {children}
     </>
-  );
+  )
 }
