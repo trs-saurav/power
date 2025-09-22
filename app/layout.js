@@ -55,7 +55,7 @@ export const metadata = {
 
   alternates: {
     canonical: 'https://powerele.shop',
-    languages: { 'en-IN': 'https://powerele.shop', 'hi-IN': 'https://powerele.shop/hi' },
+  
   },
   category: 'electronics',
   classification: 'business',

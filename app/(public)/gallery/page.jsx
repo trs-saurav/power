@@ -300,7 +300,7 @@ export default function ModernGalleryPage() {
     );
 
     return (
-        <div className="min-h-screen m-auto relative overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800">
+        <div className="min-h-screen m-auto relative mt-12 overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800">
             
             
 

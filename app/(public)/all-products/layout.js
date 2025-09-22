@@ -41,7 +41,7 @@ export const metadata = {
     images: ['/products-gallery.jpg'],
   },
   alternates: {
-    canonical: 'https://powerele.shop/all-products',
+   canonical: '/all-products',
   },
   robots: {
     index: true,

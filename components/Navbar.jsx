@@ -285,8 +285,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Spacer to prevent content from hiding behind fixed navbar */}
-      <div className="h-16 lg:h-20"></div>
+    
     </>
   );
 };

@@ -119,7 +119,7 @@ export default function ProductClient({ initialProduct, productId }) {
   if (!productData) return loadingFallback ? <Loading /> : <Loading />
 
   return (
-    <div className="min-h-screen bg-background pt-10">
+    <div className="min-h-screen  bg-background pt-10">
       <motion.div initial="hidden" animate="visible" variants={containerVariants} className="container mx-auto px-4 md:px-8 lg:px-16 py-8">
         {/* Back + Share + Breadcrumb */}
         <motion.div variants={itemVariants} className="mb-6">
