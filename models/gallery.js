@@ -15,6 +15,6 @@ const gallerySchema = new mongoose.Schema({
 });
 
 // Check if model already exists before creating it
-const Gallery = mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema);
+const Gallery = mongoose.models?.Gallery || mongoose.model('Gallery', gallerySchema);
 
 export default Gallery;

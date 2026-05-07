@@ -19,7 +19,6 @@ import {
   Search, 
   Grid3X3, 
   List, 
-  SlidersHorizontal,
   X,
   Filter,
   Package,

@@ -1,9 +1,8 @@
 // api/admin/vouchers/delete/route.js
 import connectDB from "@/config/db";
 import Voucher from "@/models/voucher";
-import authSeller from "@/lib/authSeller";
 import { NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 // DELETE method
 export async function DELETE(request) {
@@ -11,10 +10,8 @@ export async function DELETE(request) {
     console.log('=== Voucher Delete API Called ===');
     
     // Auth check
-    const { userId } = getAuth(request);
-    const isAdmin = await authSeller(userId);
-    
-    if (!isAdmin) {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
       return NextResponse.json(
         { success: false, message: "Admin access required" },
         { status: 401 }
@@ -78,21 +75,6 @@ export async function DELETE(request) {
     // Check if voucher has been used
     const hasBeenUsed = voucher.usedCount > 0;
     
-    // Optionally, you might want to prevent deletion of used vouchers
-    // Uncomment the following lines if you want this behavior:
-    /*
-    if (hasBeenUsed) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Cannot delete voucher that has been used. Consider deactivating it instead.",
-          usedCount: voucher.usedCount
-        },
-        { status: 400 }
-      );
-    }
-    */
-
     // Delete the voucher from database
     const deletedVoucher = await Voucher.findByIdAndDelete(voucherId);
     
@@ -121,10 +103,6 @@ export async function DELETE(request) {
       { 
         success: false, 
         message: error.message || "Failed to delete voucher",
-        error: process.env.NODE_ENV === 'development' ? {
-          stack: error.stack,
-          name: error.name
-        } : undefined,
         timestamp: new Date().toISOString()
       },
       { status: 500 }
@@ -168,10 +146,8 @@ export async function POST(request) {
 // Bulk delete method
 export async function PATCH(request) {
   try {
-    const { userId } = getAuth(request);
-    const isAdmin = await authSeller(userId);
-    
-    if (!isAdmin) {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
       return NextResponse.json(
         { success: false, message: "Not authorized" },
         { status: 401 }
@@ -228,7 +204,7 @@ export async function PATCH(request) {
   }
 }
 
-// GET method for testing (optional)
+// GET method for testing
 export async function GET(request) {
   return NextResponse.json({
     message: "Voucher deletion endpoint",
@@ -236,11 +212,6 @@ export async function GET(request) {
       DELETE: "Delete voucher by ID",
       POST: "Delete voucher via POST with action='delete'",
       PATCH: "Bulk delete vouchers"
-    },
-    usage: {
-      DELETE: "DELETE /api/admin/vouchers/delete?id=VOUCHER_ID",
-      POST: "POST /api/admin/vouchers/delete with body: {voucherId: 'ID', action: 'delete'}",
-      PATCH: "PATCH /api/admin/vouchers/delete with body: {voucherIds: ['ID1', 'ID2'], action: 'bulk_delete'}"
     }
   });
 }

@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import connectDB from "@/config/db";
 import User from "@/models/user";
 import Product from "@/models/product";
@@ -9,7 +8,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         if (!session?.user?.email) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
@@ -35,7 +34,7 @@ export async function POST(request) {
             );
         }
 
-        // Validate products and calculate amount (but don't create order here)
+        // Validate products and calculate amount
         let totalAmount = 0;
         const validatedItems = [];
         const notFoundProducts = [];
@@ -48,7 +47,6 @@ export async function POST(request) {
             const product = await Product.findById(item.productId);
             
             if (!product) {
-                console.error(`Product not found: ${item.productId}`);
                 notFoundProducts.push(item.productId);
                 continue;
             }
@@ -72,7 +70,6 @@ export async function POST(request) {
             const itemTotal = price * item.quantity;
             totalAmount += itemTotal;
 
-            // Structure according to your schema
             validatedItems.push({
                 productId: item.productId,
                 quantity: item.quantity,
@@ -104,13 +101,10 @@ export async function POST(request) {
         // Calculate delivery fee
         const deliveryFee = totalAmount > 500 ? 0 : 50;
 
-        // Enhanced voucher validation and discount calculation
         let finalDiscount = 0;
         let appliedVoucher = null;
 
         if (promoCode) {
-            console.log(`Processing voucher: ${promoCode}`);
-            
             const voucher = await Voucher.findOne({ 
                 code: promoCode.toUpperCase(),
                 isActive: true 
@@ -121,164 +115,49 @@ export async function POST(request) {
                 const startDate = new Date(voucher.startDate);
                 const endDate = new Date(voucher.endDate);
 
-                // Check date validity
                 if (now >= startDate && now <= endDate) {
-                    
-                    // Check overall usage limit
                     if (!voucher.usageLimit || voucher.usedCount < voucher.usageLimit) {
-                        
-                        // Check user-specific usage limit
                         const userUsageCount = voucher.usedBy.filter(usage => usage.userId === userId).length;
                       
                         if (userUsageCount < voucher.userUsageLimit) {
-                            
-                            // Check order amount limits
                             const minOrderValid = !voucher.minOrderAmount || totalAmount >= voucher.minOrderAmount;
                             const maxOrderValid = !voucher.maxOrderAmount || totalAmount <= voucher.maxOrderAmount;
                             
                             if (minOrderValid && maxOrderValid) {
-                                
-                                // Check category restrictions if applicable
-                                let categoryValid = true;
-                                if (voucher.applicableCategories.length > 0) {
-                                    const productIds = validatedItems.map(item => item.productId);
-                                    const products = await Product.find({ 
-                                        _id: { $in: productIds } 
-                                    }, 'category');
-                                    
-                                    const cartCategories = products.map(p => p.category);
-                                    categoryValid = cartCategories.some(cat => 
-                                        voucher.applicableCategories.includes(cat)
-                                    );
-                                    
-                                    if (!categoryValid) {
-                                        console.log(`Voucher not applicable - categories: ${cartCategories} vs required: ${voucher.applicableCategories}`);
+                                // Calculate discount
+                                if (voucher.discountType === 'percentage') {
+                                    finalDiscount = (totalAmount * voucher.discountValue) / 100;
+                                    if (voucher.maxDiscountAmount) {
+                                        finalDiscount = Math.min(finalDiscount, voucher.maxDiscountAmount);
                                     }
+                                } else if (voucher.discountType === 'fixed_amount') {
+                                    finalDiscount = voucher.discountValue;
                                 }
 
-                                // Check brand restrictions if applicable
-                                let brandValid = true;
-                                if (voucher.applicableBrands.length > 0) {
-                                    const productIds = validatedItems.map(item => item.productId);
-                                    const products = await Product.find({ 
-                                        _id: { $in: productIds } 
-                                    }, 'brand');
-                                    
-                                    const cartBrands = products.map(p => p.brand);
-                                    brandValid = cartBrands.some(brand => 
-                                        voucher.applicableBrands.includes(brand)
-                                    );
-                                    
-                                    if (!brandValid) {
-                                        console.log(`Voucher not applicable - brands: ${cartBrands} vs required: ${voucher.applicableBrands}`);
-                                    }
-                                }
+                                finalDiscount = Math.min(finalDiscount, totalAmount);
 
-                                if (categoryValid && brandValid) {
-                                    
-                                    // Calculate discount
-                                    if (voucher.discountType === 'percentage') {
-                                        finalDiscount = (totalAmount * voucher.discountValue) / 100;
-                                        if (voucher.maxDiscountAmount) {
-                                            finalDiscount = Math.min(finalDiscount, voucher.maxDiscountAmount);
-                                        }
-                                    } else if (voucher.discountType === 'fixed_amount') {
-                                        finalDiscount = voucher.discountValue;
-                                    }
-
-                                    finalDiscount = Math.min(finalDiscount, totalAmount);
-
-                                    appliedVoucher = {
-                                        code: voucher.code,
-                                        title: voucher.title,
-                                        description: voucher.description,
-                                        discountType: voucher.discountType,
-                                        discountValue: voucher.discountValue,
-                                        appliedDiscount: finalDiscount
-                                    };
-
-                                    console.log(`Voucher successfully applied: ${voucher.code}, discount: ${finalDiscount}`);
-
-                                } else {
-                                    console.log('Voucher not applicable due to category/brand restrictions');
-                                    return NextResponse.json({
-                                        success: false,
-                                        message: voucher.applicableCategories.length > 0 
-                                            ? `This voucher is only applicable to: ${voucher.applicableCategories.join(', ')}`
-                                            : `This voucher is only applicable to brands: ${voucher.applicableBrands.join(', ')}`
-                                    }, { status: 400 });
-                                }
-                            } else {
-                                const limitMessage = !minOrderValid 
-                                    ? `Minimum order amount of ₹${voucher.minOrderAmount} required`
-                                    : `Maximum order amount of ₹${voucher.maxOrderAmount} exceeded`;
-                                
-                                console.log(`Order amount validation failed: ${limitMessage}`);
-                                return NextResponse.json({
-                                    success: false,
-                                    message: limitMessage
-                                }, { status: 400 });
+                                appliedVoucher = {
+                                    code: voucher.code,
+                                    title: voucher.title,
+                                    appliedDiscount: finalDiscount
+                                };
                             }
-                        } else {
-                            console.log(`User has exceeded usage limit for voucher`);
-                            return NextResponse.json({
-                                success: false,
-                                message: "You have already used this voucher the maximum number of times"
-                            }, { status: 400 });
                         }
-                    } else {
-                        console.log('Voucher has reached overall usage limit');
-                        return NextResponse.json({
-                            success: false,
-                            message: "This voucher has reached its usage limit"
-                        }, { status: 400 });
                     }
-                } else {
-                    console.log('Voucher is not within valid date range');
-                    return NextResponse.json({
-                        success: false,
-                        message: now < startDate ? "This voucher is not yet active" : "This voucher has expired"
-                    }, { status: 400 });
                 }
-            } else {
-                console.log('Voucher not found or inactive');
-                return NextResponse.json({
-                    success: false,
-                    message: "Invalid voucher code"
-                }, { status: 400 });
             }
         } else if (discount) {
-            // Fallback for provided discount
             finalDiscount = discount;
-            console.log(`Using provided discount: ${finalDiscount}`);
         }
 
-        // Calculate final amount
         const finalAmount = totalAmount + deliveryFee - finalDiscount;
-
-        console.log(`Final calculation: Subtotal: ${totalAmount} + Delivery: ${deliveryFee} - Discount: ${finalDiscount} = Total: ${finalAmount}`);
-
-        // Get user email info
-        let userEmail = null;
-        let userName = null;
-
-        if (user.email) {
-            userEmail = user.email;
-            userName = user.name || user.firstName || address.fullName;
-        } else if (user.emailAddresses && user.emailAddresses.length > 0) {
-            userEmail = user.emailAddresses[0].emailAddress;
-            userName = user.firstName && user.lastName 
-                ? `${user.firstName} ${user.lastName}` 
-                : user.firstName || address.fullName;
-        }
-
-        // Generate temporary order ID for tracking
+        const userEmail = user.email;
+        const userName = user.name || address.fullName;
         const tempOrderId = `temp_${userId}_${Date.now()}`;
 
-        // 🚀 SEND TO INNGEST FOR COMPLETE ORDER CREATION (NO ORDER CREATION HERE)
         try {
             await inngest.send({
-                id: `create-order-${tempOrderId}`, // Unique deduplication ID
+                id: `create-order-${tempOrderId}`,
                 name: "order/create",
                 data: {
                     tempOrderId,
@@ -290,49 +169,35 @@ export async function POST(request) {
                     discount: finalDiscount,
                     promoCode: promoCode || null,
                     appliedVoucher: appliedVoucher,
-                    voucherCode: appliedVoucher?.code || null,
                     address,
                     status: "Order Placed",
                     paymentMethod: "COD",
                     payment: false,
                     date: Date.now(),
-                    // User info for emails
                     userEmail: userEmail,
                     userName: userName
                 },
             });
 
-            console.log('✅ Order creation request sent to Inngest');
-
-            // Return immediate response - order will be created by Inngest
             return NextResponse.json({
                 success: true, 
                 message: "Order is being processed",
                 tempOrderId: tempOrderId,
-                orderNumber: tempOrderId.slice(-8).toUpperCase(),
                 amount: finalAmount,
                 subtotal: totalAmount,
                 deliveryFee: deliveryFee,
                 discount: finalDiscount,
                 appliedVoucher: appliedVoucher,
-                items: validatedItems.length,
-                status: "processing",
-                emailSent: userEmail ? true : false
+                status: "processing"
             });
 
         } catch (inngestError) {
-            console.error('❌ Inngest error:', inngestError);
-            return NextResponse.json({
-                success: false,
-                message: "Failed to process order. Please try again."
-            }, { status: 500 });
+            console.error('Inngest error:', inngestError);
+            return NextResponse.json({ success: false, message: "Failed to process order" }, { status: 500 });
         }
 
     } catch (error) {
         console.error("Order processing error:", error);
-        return NextResponse.json({
-            success: false, 
-            message: error.message || "Failed to process order"
-        }, { status: 500 });
+        return NextResponse.json({ success: false, message: error.message || "Failed to process order" }, { status: 500 });
     }
 }

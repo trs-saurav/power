@@ -93,13 +93,13 @@ export default function HeroSection() {
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.08] tracking-tight mb-6"
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-white leading-[1.08] tracking-tight mb-6"
               style={{ whiteSpace: "pre-line" }}>
               {s.headline}
             </h1>
 
             {/* Sub */}
-            <p className="text-base sm:text-lg text-white/65 leading-relaxed mb-10 max-w-lg">
+            <p className="text-base sm:text-lg font-body text-white/65 leading-relaxed mb-10 max-w-lg">
               {s.sub}
             </p>
 

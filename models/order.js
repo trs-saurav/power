@@ -129,5 +129,5 @@ orderSchema.index({ userId: 1, status: 1 });
 orderSchema.index({ status: 1, date: -1 });
 orderSchema.index({ 'courier.trackingId': 1 });
 
-const Order = mongoose.models.order || mongoose.model("order", orderSchema);
+const Order = mongoose.models?.order || mongoose.model("order", orderSchema);
 export default Order;

@@ -1,99 +1,54 @@
 import connectDB from "@/config/db";
-import authSeller from "@/lib/authSeller";
 import Product from "@/models/product";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 // GET single product for editing
 export async function GET(request, { params }) {
   try {
-    await connectDB();
-
-    const user = await authSeller(request);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized access" },
-        { status: 401 }
-      );
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const productId = params?.id;
+    await connectDB();
+    const { id: productId } = await params;
 
     if (!productId) {
-      return NextResponse.json(
-        { success: false, message: "Product ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "Product ID is required" }, { status: 400 });
     }
 
     const product = await Product.findById(productId);
     if (!product) {
-      return NextResponse.json(
-        { success: false, message: "Product not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { 
-        success: true, 
-        product: {
-          id: product._id,
-          name: product.name,
-          description: product.description,
-          brand: product.brand,
-          model: product.model,
-          category: product.category,
-          price: product.price,
-          offerPrice: product.offerPrice,
-          images: product.images,
-          availability: product.availability,
-          warrantyPeriod: product.warranty?.period,
-          warrantyType: product.warranty?.type,
-          capacityValue: product.capacity?.value,
-          capacityUnit: product.capacity?.unit,
-          weightValue: product.weight?.value,
-          weightUnit: product.weight?.unit,
-          createdAt: product.createdAt || product.date
-        }
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ 
+      success: true, 
+      product 
+    });
 
   } catch (error) {
-    console.error('Get product for edit error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        message: "Failed to fetch product details",
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
-      { status: 500 }
-    );
+    console.error('Get product error:', error);
+    return NextResponse.json({ success: false, message: "Failed to fetch product" }, { status: 500 });
   }
 }
 
 // UPDATE product
 export async function PUT(request, { params }) {
   try {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
     await connectDB();
+    const { id: productId } = await params;
 
-    const user = await authSeller(request);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized access" },
-        { status: 401 }
-      );
-    }
-
-    const productId = params?.id;
     if (!productId) {
-      return NextResponse.json(
-        { success: false, message: "Product ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "Product ID is required" }, { status: 400 });
     }
 
-    // Parse the form data
     const formData = await request.formData();
     
     const updateData = {
@@ -107,7 +62,6 @@ export async function PUT(request, { params }) {
       availability: formData.get('availability') || 'in_stock'
     };
 
-    // Handle warranty
     const warrantyPeriod = formData.get('warrantyPeriod');
     const warrantyType = formData.get('warrantyType');
     if (warrantyPeriod && warrantyType) {
@@ -117,7 +71,6 @@ export async function PUT(request, { params }) {
       };
     }
 
-    // Handle capacity
     const capacityValue = formData.get('capacityValue');
     const capacityUnit = formData.get('capacityUnit');
     if (capacityValue && capacityUnit) {
@@ -127,7 +80,6 @@ export async function PUT(request, { params }) {
       };
     }
 
-    // Handle weight
     const weightValue = formData.get('weightValue');
     const weightUnit = formData.get('weightUnit');
     if (weightValue && weightUnit) {
@@ -137,17 +89,6 @@ export async function PUT(request, { params }) {
       };
     }
 
-    // Handle new images (if any) - you'll need to implement image upload logic here
-    // For now, we'll keep existing images
-    const existingProduct = await Product.findById(productId);
-    if (!existingProduct) {
-      return NextResponse.json(
-        { success: false, message: "Product not found" },
-        { status: 404 }
-      );
-    }
-
-    // Update the product
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       updateData,
@@ -155,30 +96,17 @@ export async function PUT(request, { params }) {
     );
 
     if (!updatedProduct) {
-      return NextResponse.json(
-        { success: false, message: "Failed to update product" },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: false, message: "Failed to update product" }, { status: 500 });
     }
 
-    return NextResponse.json(
-      { 
-        success: true, 
-        message: "Product updated successfully",
-        product: updatedProduct
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ 
+      success: true, 
+      message: "Product updated successfully",
+      product: updatedProduct
+    });
 
   } catch (error) {
     console.error('Update product error:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        message: "Failed to update product",
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: "Failed to update product" }, { status: 500 });
   }
 }

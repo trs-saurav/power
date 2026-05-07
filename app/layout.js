@@ -1,9 +1,10 @@
 // app/layout.js
-import { Outfit } from 'next/font/google'
+import { Outfit, Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 
-const outfit = Outfit({ subsets: ['latin'], weight: ['300','400','500'] })
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata = {
   metadataBase: new URL('https://powerele.shop'),
@@ -78,7 +79,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.className} antialiased bg-background text-foreground`}>
+      <body className={`${outfit.variable} ${inter.variable} font-sans antialiased bg-background text-foreground`}>
         <Providers>{children}</Providers>
       </body>
     </html>

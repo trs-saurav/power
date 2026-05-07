@@ -1,26 +1,22 @@
 import connectDB from "@/config/db";
 import Product from "@/models/product";
-import authSeller from "@/lib/authSeller";
 import { NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 export async function GET(request) {
   try {
-    // Auth (still protect the endpoint; only authorized sellers/admins can read)
-    const { userId } = getAuth(request);
-    const isAdmin = await authSeller(userId);
-    if (!isAdmin) {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
       return NextResponse.json(
         { success: false, message: "Not authorized" },
         { status: 401 }
       );
     }
 
-    // DB
     await connectDB();
 
-    // Return ALL products (no filter)
-    const products = await Product.find({}).lean();
+    // Return ALL products
+    const products = await Product.find({}).sort({ createdAt: -1 }).lean();
 
     return NextResponse.json(
       { success: true, products },

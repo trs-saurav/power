@@ -1,11 +1,12 @@
 import connectDB from "@/config/db";
 import Address from "@/models/address";
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 
 export async function GET(request) {
   try {
-    const authHeader = request.headers.get("Authorization");
-    const email = authHeader?.split(" ")[1];
+    const session = await auth();
+    const email = session?.user?.email;
 
     if (!email) {
       return NextResponse.json(
@@ -33,8 +34,8 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const authHeader = request.headers.get("Authorization");
-    const email = authHeader?.split(" ")[1];
+    const session = await auth();
+    const email = session?.user?.email;
 
     if (!email) {
       return NextResponse.json(

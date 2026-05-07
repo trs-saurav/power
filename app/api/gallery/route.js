@@ -1,11 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import Gallery from '@/models/gallery';
 import { v2 as cloudinary } from 'cloudinary';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import authSeller from '@/lib/authSeller';
-
+import { auth } from '@/auth';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -16,14 +13,9 @@ cloudinary.config({
 
 export async function POST(request) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user?.email) {
+        const session = await auth();
+        if (!session || session.user?.role !== 'admin') {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-        const userId = session.user.email;
-        const isAdmin = await authSeller(userId);
-        if (!isAdmin) {
-            return NextResponse.json({ success: false, message: "Not authorized" }, { status: 401 });
         }
 
         await connectDB();

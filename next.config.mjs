@@ -24,8 +24,14 @@ const nextConfig = {
             sizeLimit: '10mb', // Increase if needed
         },
     },
+    transpilePackages: ['next-auth'],
     experimental: {
-        serverComponentsExternalPackages: ['cloudinary', 'next-auth', 'openid-client'],
+        turbo: {
+            resolveAlias: {
+                'next/server': 'next/server.js',
+            },
+        },
+        serverExternalPackages: ['mongoose', 'cloudinary', 'next-auth', 'openid-client'],
     },
 };
 

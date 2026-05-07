@@ -1,17 +1,14 @@
 // api/admin/vouchers/route.js
 import connectDB from "@/config/db";
 import Voucher from "@/models/voucher";
-import authSeller from "@/lib/authSeller";
 import { NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 // GET - Fetch all vouchers for admin
 export async function GET(request) {
   try {
-    const { userId } = getAuth(request);
-    const isAdmin = await authSeller(userId);
-    
-    if (!isAdmin) {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
       return NextResponse.json(
         { success: false, message: "Not authorized" },
         { status: 401 }
@@ -97,15 +94,15 @@ export async function GET(request) {
 // POST - Create new voucher
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request);
-    const isAdmin = await authSeller(userId);
-    
-    if (!isAdmin) {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
       return NextResponse.json(
         { success: false, message: "Not authorized" },
         { status: 401 }
       );
     }
+
+    const userId = session.user.id;
 
     const body = await request.json();
     const {

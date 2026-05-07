@@ -88,6 +88,6 @@ productSchema.index({ price: 1 });
 productSchema.index({ availability: 1 });
 productSchema.index({ userId: 1 });
 
-const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
+const Product = mongoose.models?.Product || mongoose.model("Product", productSchema);
 
 export default Product;

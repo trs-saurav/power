@@ -1,15 +1,13 @@
 import connectDB from "@/config/db";
-import authSeller from "@/lib/authSeller";
 import Product from "@/models/product";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 
-// Ensure Node.js runtime (Buffer, Cloudinary SDK, etc.)
+// Ensure Node.js runtime
 export const runtime = 'nodejs';
 
-// Configure Cloudinary (server-only env vars)
+// Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -18,16 +16,12 @@ cloudinary.config({
 
 export async function POST(request) {
   try {
-    // Auth
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const session = await auth();
+    if (!session || session.user?.role !== 'admin') {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const isAdmin = await authSeller(session.user.email);
-    if (!isAdmin) {
-      return NextResponse.json({ success: false, message: "Not authorized" }, { status: 401 });
-    }
+    const userId = session.user.id || session.user.email;
 
     // Parse form data
     const formData = await request.formData();
@@ -38,44 +32,20 @@ export async function POST(request) {
     const offerPrice = formData.get("offerPrice");
     const brand = formData.get("brand");
     const model = formData.get("model");
-    
-    // Warranty fields
     const warrantyPeriod = formData.get("warrantyPeriod");
     const warrantyType = formData.get("warrantyType");
-    
-    // Capacity fields
     const capacityValue = formData.get("capacityValue");
     const capacityUnit = formData.get("capacityUnit");
-    
-    // Additional fields
     const availability = formData.get("availability");
     const weightValue = formData.get("weightValue");
     const weightUnit = formData.get("weightUnit");
-    
-    const files = formData.getAll("images"); // array of Web File
+    const files = formData.getAll("images");
 
     // Basic validation
-    if (!name || !description || !category || !price || !offerPrice || !brand || !model) {
+    if (!name || !description || !category || !price || !offerPrice || !brand || !model || !warrantyPeriod || !warrantyType) {
       return NextResponse.json({ 
         success: false, 
-        message: "Missing required fields: name, description, category, price, offerPrice, brand, model" 
-      }, { status: 400 });
-    }
-    
-    // Warranty validation
-    if (!warrantyPeriod || !warrantyType) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Missing warranty information: warrantyPeriod and warrantyType are required" 
-      }, { status: 400 });
-    }
-    
-    // Validate warranty type enum
-    const validWarrantyTypes = ["manufacturer", "seller", "extended", "none"];
-    if (!validWarrantyTypes.includes(warrantyType)) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Invalid warranty type. Must be: manufacturer, seller, extended, or none" 
+        message: "Missing required fields" 
       }, { status: 400 });
     }
     
@@ -83,40 +53,25 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: "No image files received" }, { status: 400 });
     }
 
-    // Helpful logging
-    files.forEach((f, idx) => {
-      // Web File has name, type, size
-      console.log(`File[${idx}] => name=${f?.name} type=${f?.type} size=${f?.size}`);
-    });
-
-    // Upload each file to Cloudinary using data URI (robust in App Router)
+    // Upload files to Cloudinary
     const uploadResults = await Promise.all(
       files.map(async (file) => {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        if (!buffer?.length) {
-          throw new Error("Received empty file buffer");
-        }
-
         const base64 = buffer.toString('base64');
         const dataUri = `data:${file.type || 'application/octet-stream'};base64,${base64}`;
 
-        // Optional: add folder or tags as needed
-        const result = await cloudinary.uploader.upload(dataUri, {
+        return await cloudinary.uploader.upload(dataUri, {
           resource_type: 'auto',
-          folder: 'products', // change or remove as needed
+          folder: 'products',
           use_filename: true,
           unique_filename: true,
           overwrite: false
         });
-
-        // result.secure_url should be present
-        return result;
       })
     );
 
     const images = uploadResults.map((r) => r.secure_url);
-    console.log("Uploaded image URLs:", images);
 
     // Prepare product data
     const productData = {
@@ -136,22 +91,14 @@ export async function POST(request) {
       date: Date.now()
     };
 
-    // Add capacity if provided
     if (capacityValue || capacityUnit) {
       productData.capacity = {};
       if (capacityValue) productData.capacity.value = Number(capacityValue);
       if (capacityUnit) productData.capacity.unit = capacityUnit;
     }
 
-    // Add availability if provided
-    if (availability) {
-      const validAvailability = ["in_stock", "out_of_stock", "pre_order", "discontinued"];
-      if (validAvailability.includes(availability)) {
-        productData.availability = availability;
-      }
-    }
+    if (availability) productData.availability = availability;
 
-    // Add weight if provided
     if (weightValue || weightUnit) {
       productData.weight = {};
       if (weightValue) productData.weight.value = Number(weightValue);
@@ -168,6 +115,7 @@ export async function POST(request) {
       productId: newProduct?._id,
       images: images
     });
+
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json({

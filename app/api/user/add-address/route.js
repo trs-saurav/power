@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Address from "@/models/address";
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 export async function POST(request) {
     try {
         console.log('Starting address creation...');
         
-        const { userId } = getAuth(request);
-        console.log('User ID:', userId);
+        const session = await auth();
+        const userId = session?.user?.id || session?.user?.email; // Fallback to email if id is not available
+        
+        console.log('User ID from session:', userId);
         
         if (!userId) {
             return NextResponse.json(

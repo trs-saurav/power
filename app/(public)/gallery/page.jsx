@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, X, ChevronLeft, ChevronRight, 
-  Eye, Grid3X3, Sun, Zap, Monitor, Camera, Plus
+  Eye, Grid3X3, Sun, Zap, Monitor, Camera, Plus,
+  LayoutGrid, ArrowRight
 } from 'lucide-react';
 
 const serviceTypes = [
@@ -15,18 +16,15 @@ const serviceTypes = [
   { value: 'camera', label: 'Security Systems', icon: Camera }
 ];
 
-const ITEMS_PER_PAGE = 8; // Adjust this if you want more/less per page
+const ITEMS_PER_PAGE = 8;
 
 export default function CorporateGalleryPage() {
   const [galleryItems, setGalleryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('all');
   const [selectedImage, setSelectedImage] = useState(null);
-  
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch gallery items
   useEffect(() => {
     const fetchGalleryItems = async () => {
       setLoading(true);
@@ -45,17 +43,14 @@ export default function CorporateGalleryPage() {
     fetchGalleryItems();
   }, []);
 
-  // Filter Logic
   const filteredItems = galleryItems.filter(item => {
     return filterType === 'all' || item.type === filterType;
   });
 
-  // Reset pagination when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [filterType]);
 
-  // Calculate items for current page
   const paginatedItems = filteredItems.slice(0, currentPage * ITEMS_PER_PAGE);
   const hasMore = paginatedItems.length < filteredItems.length;
 
@@ -63,7 +58,6 @@ export default function CorporateGalleryPage() {
     setCurrentPage(prev => prev + 1);
   };
 
-  // Lightbox Handlers
   const openLightbox = (item) => {
     const filteredIndex = filteredItems.findIndex(fi => fi._id === item._id);
     setSelectedImage({ ...item, index: filteredIndex });
@@ -98,143 +92,146 @@ export default function CorporateGalleryPage() {
   }, [selectedImage, filteredItems]);
 
   return (
-    <main className="min-h-screen bg-[#fbf8ff] text-slate-900 font-sans antialiased">
+    <main className="min-h-screen bg-[#0a0a0b] text-white font-body antialiased overflow-x-hidden">
       
-      {/* ── 1. SEO HERO / HEADER ── */}
-      <header className="relative w-full pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 flex flex-col items-center justify-center text-center overflow-hidden">
-        {/* Background Image with Deep Blue Overlay */}
+      {/* ── 1. PREMIUM HERO SECTION ── */}
+      <header className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image 
-            src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?q=80&w=2070&auto=format&fit=crop"
-            alt="Advanced industrial infrastructure facility"
+            src="/about/gallery_hero.png"
+            alt="Advanced industrial portfolio"
             fill
             priority
-            className="object-cover"
+            className="object-cover opacity-50 scale-105"
           />
-          <div className="absolute inset-0 bg-[#1E40AF]/85 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#001453]/60 to-[#1a1b22]/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0b]/80 via-transparent to-[#0a0a0b]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0b] via-transparent to-[#0a0a0b]/40" />
         </div>
 
         <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
+          initial={{ opacity: 0, y: 30 }} 
           animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.6 }}
-          className="relative z-10 max-w-4xl mx-auto mt-4"
+          transition={{ duration: 0.8 }}
+          className="relative z-10 max-w-7xl mx-auto px-6 text-center"
         >
-          <span className="inline-block text-[#F59E0B] font-bold tracking-widest uppercase text-sm mb-4">
-            Industrial Excellence
-          </span>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight">
-            Our Engineering Portfolio
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            <span className="text-xs font-bold tracking-widest text-blue-400 uppercase">Visual Authority</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-black leading-[0.9] tracking-tighter mb-6 uppercase">
+            Project <br/>
+            <span className="text-blue-500 italic">Telemetry.</span>
           </h1>
-          <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
-            Explore our proven track record in delivering high-specification industrial and commercial electrical solutions worldwide.
+          <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            A high-definition showcase of our structural achievements across industrial, commercial, and solar infrastructures.
           </p>
         </motion.div>
       </header>
 
-      {/* ── 2. FILTER BAR ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-8">
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <button
-            onClick={() => setFilterType('all')}
-            className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${
-              filterType === 'all' 
-              ? 'bg-[#1E40AF] text-white shadow-md border-transparent' 
-              : 'bg-white text-slate-700 hover:bg-[#e8e7f1] border border-[#c4c5d5]'
-            }`}
-          >
-            <Grid3X3 className="w-4 h-4 mr-2" /> All Projects
-          </button>
-          {serviceTypes.map(type => (
+      {/* ── 2. FILTER SYSTEM ── */}
+      <section className="sticky top-[80px] z-40 bg-[#0a0a0b]/80 backdrop-blur-xl border-y border-white/5 py-6">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
-              key={type.value}
-              onClick={() => setFilterType(type.value)}
-              className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                filterType === type.value 
-                ? 'bg-[#1E40AF] text-white shadow-md border-transparent' 
-                : 'bg-white text-slate-700 hover:bg-[#e8e7f1] border border-[#c4c5d5]'
+              onClick={() => setFilterType('all')}
+              className={`flex items-center px-6 py-2 rounded-none text-xs font-bold tracking-widest uppercase transition-all duration-300 border ${
+                filterType === 'all' 
+                ? 'bg-blue-600 border-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
+                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
               }`}
             >
-              <type.icon className="w-4 h-4 mr-2" /> {type.label}
+              <LayoutGrid className="w-4 h-4 mr-2" /> All Divisions
             </button>
-          ))}
+            {serviceTypes.map(type => (
+              <button
+                key={type.value}
+                onClick={() => setFilterType(type.value)}
+                className={`flex items-center px-6 py-2 rounded-none text-xs font-bold tracking-widest uppercase transition-all duration-300 border ${
+                  filterType === type.value 
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
+                }`}
+              >
+                <type.icon className="w-4 h-4 mr-2" /> {type.label}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── 3. DYNAMIC GRID ── */}
-      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 min-h-[50vh] pb-24">
+      {/* ── 3. PROJECT GRID ── */}
+      <section className="max-w-[1600px] mx-auto px-6 py-20 min-h-[50vh]">
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E40AF]"></div>
+          <div className="flex flex-col justify-center items-center py-20 space-y-4">
+            <div className="w-12 h-12 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-slate-500 font-bold tracking-widest text-xs uppercase">Initializing Grid...</p>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="text-center py-20">
-            <Eye className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-slate-900 mb-2">No Projects Found</h3>
-            <p className="text-slate-500">Try adjusting your filters or search terms.</p>
+          <div className="text-center py-20 border border-dashed border-white/10">
+            <Eye className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-2xl font-heading font-bold text-white mb-2 uppercase">Zero Records Found</h3>
+            <p className="text-slate-500">No telemetry data matches the selected filter.</p>
           </div>
         ) : (
           <>
             <motion.div 
               layout
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             >
               <AnimatePresence>
-                {paginatedItems.map((item) => {
+                {paginatedItems.map((item, idx) => {
                   const typeConfig = serviceTypes.find(t => t.value === item.type) || serviceTypes[0];
                   return (
                     <motion.article
                       layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.5, delay: idx * 0.05 }}
                       key={item._id}
                       onClick={() => openLightbox(item)}
-                      className="group relative cursor-pointer bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[#e8e7f1] aspect-square"
+                      className="group relative cursor-pointer bg-white/5 border border-white/5 overflow-hidden aspect-square"
                     >
-                      <img 
+                      <Image 
                         src={item.imageUrl} 
                         alt={`${typeConfig.label} Project`} 
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
                       />
-                      {/* Dark Gradient Overlay for Text Visibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#001453]/90 via-[#001453]/30 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
                       
-                      {/* Content Container */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 flex flex-col justify-end h-full">
-                        <motion.div 
-                          initial={{ y: 10, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.1 }}
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="bg-[#F59E0B] text-[#001453] text-[10px] sm:text-xs font-bold px-2 py-1 rounded flex items-center shadow-md">
-                              <typeConfig.icon className="w-3 h-3 mr-1" /> {typeConfig.label}
-                            </span>
-                          </div>
-                          <p className="text-white text-sm sm:text-base font-medium line-clamp-2 drop-shadow-md">
-                            Click to view full project
-                          </p>
-                        </motion.div>
+                      {/* Obsidian Overlay */}
+                      <div className="absolute inset-0 bg-[#0a0a0b]/40 group-hover:bg-[#0a0a0b]/10 transition-colors duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0b] via-transparent to-transparent opacity-80" />
+                      
+                      {/* Content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col justify-end h-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 uppercase tracking-widest">
+                            {typeConfig.label}
+                          </span>
+                        </div>
+                        <h3 className="text-white font-heading font-bold text-lg uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                          View Project <ArrowRight className="inline w-4 h-4 ml-1.5 text-blue-500" />
+                        </h3>
                       </div>
+
+                      {/* Corner Decoration */}
+                      <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-white/10 group-hover:border-blue-500/50 transition-colors m-4" />
                     </motion.article>
                   );
                 })}
               </AnimatePresence>
             </motion.div>
 
-            {/* Pagination / Load More Button */}
+            {/* Pagination */}
             {hasMore && (
-              <div className="mt-12 flex justify-center">
+              <div className="mt-16 flex justify-center">
                 <button
                   onClick={loadMore}
-                  className="flex items-center bg-white border-2 border-[#1E40AF] text-[#1E40AF] hover:bg-[#1E40AF] hover:text-white font-bold px-8 py-3 rounded-lg transition-colors shadow-sm"
+                  className="group flex items-center bg-white text-black font-black px-12 py-5 rounded-none transition-all duration-300 hover:bg-blue-600 hover:text-white transform hover:scale-105"
                 >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Load More Projects
+                  <Plus className="w-5 h-5 mr-3" />
+                  LOAD MORE PROJECTS
                 </button>
               </div>
             )}
@@ -247,62 +244,69 @@ export default function CorporateGalleryPage() {
         {selectedImage && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#001453]/95 backdrop-blur-md p-2 sm:p-4 md:p-12"
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-[#0a0a0b]/95 backdrop-blur-2xl p-4 md:p-12"
             onClick={closeLightbox}
           >
             <div 
-              className="relative w-full max-w-6xl max-h-full flex flex-col items-center justify-center" 
+              className="relative w-full max-w-7xl max-h-full flex flex-col items-center justify-center" 
               onClick={e => e.stopPropagation()}
             >
-              {/* Close Button Mobile/Desktop */}
               <button 
                 onClick={closeLightbox}
-                className="absolute top-4 right-4 md:-top-12 md:right-0 bg-white/10 hover:bg-red-500 text-white p-2 rounded-full transition-colors z-50"
+                className="absolute top-0 right-0 md:-top-16 md:-right-4 bg-white/5 hover:bg-blue-600 text-white p-4 transition-all duration-300 z-50 border border-white/10"
               >
                 <X className="w-6 h-6" />
               </button>
 
-              <div className="relative w-full bg-black rounded-xl overflow-hidden shadow-2xl flex flex-col justify-center" style={{ maxHeight: '85vh' }}>
-                <div className="relative flex-grow flex items-center justify-center min-h-[50vh]">
-                  <img 
-                    src={selectedImage.imageUrl} 
-                    alt="Project Image" 
-                    className="max-w-full max-h-[75vh] object-contain"
-                  />
+              <div className="relative w-full bg-[#0a0a0b] border border-white/10 overflow-hidden shadow-2xl flex flex-col justify-center" style={{ maxHeight: '85vh' }}>
+                <div className="relative flex-grow flex items-center justify-center min-h-[50vh] p-4">
+                  <motion.div
+                    key={selectedImage._id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative w-full h-full max-h-[70vh]"
+                  >
+                    <Image 
+                      src={selectedImage.imageUrl} 
+                      alt="Project Showcase" 
+                      fill
+                      className="object-contain"
+                    />
+                  </motion.div>
                   
-                  {/* Nav Buttons overlaying image */}
+                  {/* Nav */}
                   {selectedImage.index > 0 && (
-                    <button onClick={prevImage} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-[#F59E0B] text-white p-2 sm:p-3 rounded-full backdrop-blur-md transition-colors">
-                      <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-blue-600 text-white p-5 border border-white/10 backdrop-blur-md transition-all">
+                      <ChevronLeft className="w-6 h-6" />
                     </button>
                   )}
                   {selectedImage.index < filteredItems.length - 1 && (
-                    <button onClick={nextImage} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-[#F59E0B] text-white p-2 sm:p-3 rounded-full backdrop-blur-md transition-colors">
-                      <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/5 hover:bg-blue-600 text-white p-5 border border-white/10 backdrop-blur-md transition-all">
+                      <ChevronRight className="w-6 h-6" />
                     </button>
                   )}
                 </div>
                 
-                {/* Image Details Bar at bottom */}
-                <div className="bg-[#1a1b22] border-t border-[#444653] p-4 sm:p-6 w-full">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                {/* Details */}
+                <div className="bg-white/5 border-t border-white/10 p-8 w-full">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                       {(() => {
                         const tConf = serviceTypes.find(t => t.value === selectedImage.type) || serviceTypes[0];
                         return (
-                          <div className="flex flex-wrap items-center gap-3">
-                            <span className="bg-[#1E40AF] text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded flex items-center shadow-md">
-                              <tConf.icon className="w-4 h-4 mr-2" /> {tConf.label}
+                          <div className="flex flex-wrap items-center gap-4">
+                            <span className="bg-blue-600 text-white text-xs font-black px-4 py-2 uppercase tracking-widest">
+                              {tConf.label}
                             </span>
-                            <span className="text-slate-400 text-xs sm:text-sm">
-                              {new Date(selectedImage.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            <span className="text-slate-500 font-bold text-xs uppercase tracking-widest">
+                              Deployed: {new Date(selectedImage.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long' })}
                             </span>
                           </div>
                         );
                       })()}
                     </div>
-                    <div className="text-slate-300 text-sm font-bold bg-[#2f3037] px-3 py-1.5 rounded border border-[#444653]">
-                      {selectedImage.index + 1} / {filteredItems.length}
+                    <div className="text-white font-heading font-black text-xl tracking-tighter">
+                      <span className="text-blue-500">{selectedImage.index + 1}</span> / {filteredItems.length}
                     </div>
                   </div>
                 </div>
@@ -313,12 +317,11 @@ export default function CorporateGalleryPage() {
       </AnimatePresence>
 
       <style jsx global>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
+        .font-heading {
+          font-family: var(--font-outfit), sans-serif;
         }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+        .font-body {
+          font-family: var(--font-inter), sans-serif;
         }
       `}</style>
 

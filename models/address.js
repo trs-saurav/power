@@ -38,6 +38,6 @@ const addressSchema = new mongoose.Schema({
 });
 
 // Fixed model syntax - use mongoose.models.Address (capital A)
-const Address = mongoose.models.Address || mongoose.model("Address", addressSchema);
+const Address = mongoose.models?.Address || mongoose.model("Address", addressSchema);
 
 export default Address;

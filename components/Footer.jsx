@@ -48,7 +48,7 @@ const Footer = () => {
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className='text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300'>
+                  <h3 className='text-xl font-heading font-black bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300 uppercase'>
                     POWER ELECTRONICS
                   </h3>
                   <p className="text-sm text-muted-foreground font-medium">
@@ -68,7 +68,7 @@ const Footer = () => {
 
             {/* Quick Links */}
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <h4 className="text-lg font-heading font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
                 <Zap className="w-4 h-4 text-primary" />
                 Quick Links
               </h4>
@@ -96,7 +96,7 @@ const Footer = () => {
 
             {/* Shop & Services */}
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground">
+              <h4 className="text-lg font-heading font-bold text-foreground uppercase tracking-wider">
                 Shop & Account
               </h4>
               <ul className="space-y-3">
@@ -127,7 +127,7 @@ const Footer = () => {
 
             {/* Contact Information */}
             <div className="space-y-6">
-              <h4 className="text-lg font-semibold text-foreground">Get In Touch</h4>
+              <h4 className="text-lg font-heading font-bold text-foreground uppercase tracking-wider">Get In Touch</h4>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
@@ -210,7 +210,7 @@ const Footer = () => {
 
             {/* Map Section - Fixed */}
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-foreground mb-4">Find Our Location</h4>
+              <h4 className="text-lg font-heading font-bold text-foreground mb-4 uppercase tracking-wider">Find Our Location</h4>
               <div className="w-full max-w-md mx-auto lg:max-w-none">
                 <div className="rounded-2xl overflow-hidden border border-border/50 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card/50 backdrop-blur-sm">
                   <div className="w-full h-64 lg:h-72">

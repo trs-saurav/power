@@ -111,6 +111,6 @@ voucherSchema.index({ isActive: 1 });
 voucherSchema.index({ startDate: 1, endDate: 1 });
 voucherSchema.index({ createdBy: 1 });
 
-const Voucher = mongoose.models.Voucher || mongoose.model("Voucher", voucherSchema);
+const Voucher = mongoose.models?.Voucher || mongoose.model("Voucher", voucherSchema);
 
 export default Voucher;

@@ -1,44 +1,25 @@
 import { NextResponse } from 'next/server';
-import { getAuth } from '@clerk/nextjs/server';
-import { createClerkClient } from '@clerk/nextjs/server';
-
-// Initialize clerkClient with your secret key
-const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-});
+import { auth } from "@/auth";
 
 export async function GET(request) {
   try {
-    const { userId } = getAuth(request);
-    if (!userId) {
+    const session = await auth();
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if current user is admin
-    const currentUser = await clerkClient.users.getUser(userId);
-    if (currentUser.publicMetadata?.role !== 'admin') {
+    if (session.user?.role !== 'admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Get all invitations
-    const response = await clerkClient.invitations.getInvitationList();
+    // Since we're migrating from Clerk, we don't have Clerk invitations anymore.
+    // If you implemented a custom invitation system in MongoDB, fetch those here.
     
-    // Handle different response formats
-    let invitationList = [];
-    if (Array.isArray(response)) {
-      invitationList = response;
-    } else if (response.data && Array.isArray(response.data)) {
-      invitationList = response.data;
-    } else if (response.invitations && Array.isArray(response.invitations)) {
-      invitationList = response.invitations;
-    } else {
-      console.warn('Unexpected invitations response format:', response);
-      invitationList = [];
-    }
-
     return NextResponse.json({ 
-      invitations: invitationList,
-      total: invitationList.length 
+      invitations: [],
+      total: 0,
+      message: "Clerk invitations system is no longer used. Migrate to a custom system if needed."
     });
 
   } catch (error) {

@@ -61,7 +61,7 @@ export default function ServicesStrip() {
             What We Do
           </p>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <h2 id="services-heading" className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+            <h2 id="services-heading" className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tight">
               Our Core Services
             </h2>
             <Link href="/services"
@@ -108,7 +108,7 @@ export default function ServicesStrip() {
 
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h3 className="text-lg font-bold text-white mb-1.5">{svc.title}</h3>
+                  <h3 className="text-lg font-heading font-bold text-white mb-1.5">{svc.title}</h3>
                   <p className="text-xs text-white/60 leading-relaxed mb-4">{svc.desc}</p>
 
                   {/* Arrow pill — slides up on hover */}

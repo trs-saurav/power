@@ -1,13 +1,11 @@
 import connectDB from "@/config/db";
 import User from "@/models/user";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-
 
 export async function GET(request) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         if (!session?.user?.email) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
@@ -18,8 +16,9 @@ export async function GET(request) {
         if (!user) {
             return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
         }
-        return NextResponse.json({ success: true, data: user }, { status: 200 });
+        return NextResponse.json({ success: true, user }, { status: 200 });
     } catch (error) {
+        console.error("Error fetching user data:", error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

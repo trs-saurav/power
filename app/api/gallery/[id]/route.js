@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/config/db';
 import Gallery from '@/models/gallery';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import authSeller from '@/lib/authSeller';
+import { auth } from '@/auth';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
@@ -15,23 +13,14 @@ cloudinary.config({
 
 export async function DELETE(request, { params }) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user?.email) {
+        const session = await auth();
+        if (!session || session.user?.role !== 'admin') {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-        }
-        const userId = session.user.email;
-
-        const isAdmin = await authSeller(userId);
-        if (!isAdmin) {
-            return NextResponse.json(
-                { success: false, message: "Admin access required" }, 
-                { status: 403 }
-            );
         }
 
         await connectDB();
 
-        const { id } = params;
+        const { id } = await params; // In Next.js 15, params is a promise
         
         // Find the gallery item
         const galleryItem = await Gallery.findById(id);
@@ -67,8 +56,7 @@ export async function DELETE(request, { params }) {
         return NextResponse.json(
             { 
                 success: false, 
-                message: 'Failed to delete gallery item',
-                ...(process.env.NODE_ENV === 'development' && { error: error.message })
+                message: 'Failed to delete gallery item'
             },
             { status: 500 }
         );
