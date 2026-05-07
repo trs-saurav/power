@@ -1,12 +1,12 @@
 import React from 'react'
 import Link from 'next/link'
 import Map from './extra/Map';
-import { 
-  Facebook, 
-  Instagram, 
-  Twitter, 
-  Phone, 
-  Mail, 
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Phone,
+  Mail,
   MapPin,
   Zap,
   ArrowRight,
@@ -31,7 +31,7 @@ const Footer = () => {
         {/* Main Footer Content */}
         <div className="max-w-7xl mx-auto px-4 py-12 lg:py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            
+
             {/* Company Info Section */}
             <div className="lg:col-span-2 space-y-6">
               <Link href="/" className="flex items-center group">
@@ -58,12 +58,12 @@ const Footer = () => {
               </Link>
 
               <p className="text-muted-foreground leading-relaxed max-w-md">
-                Leading provider of premium electrical solutions with over 25 years of experience. 
+                Leading provider of premium electrical solutions with over 25 years of experience.
                 Trusted by 10,000+ customers for reliable power and security systems.
               </p>
 
               {/* Trust Indicators */}
-             
+
             </div>
 
             {/* Quick Links */}
@@ -75,14 +75,13 @@ const Footer = () => {
               <ul className="space-y-3">
                 {[
                   { name: 'Home', href: '/' },
-                  { name: 'About Us', href: '/about' },
+                  { name: 'About Us', href: '/aboutus' },
                   { name: 'Our Gallery', href: '/gallery' },
-                  { name: 'Services', href: '/services' },
                   { name: 'Contact Us', href: '/contact-us' }
                 ].map((link) => (
                   <li key={link.name}>
-                    <Link 
-                      href={link.href} 
+                    <Link
+                      href={link.href}
                       className="group flex items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-200 text-sm font-medium"
                     >
                       <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-200" />
@@ -108,8 +107,8 @@ const Footer = () => {
                   { name: 'Customer Support', href: '/contact-us' },
                 ].map((link) => (
                   <li key={link.name}>
-                    <Link 
-                      href={link.href} 
+                    <Link
+                      href={link.href}
                       className="group flex items-center gap-2 text-muted-foreground hover:text-primary transition-all duration-200 text-sm font-medium"
                     >
                       <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-200" />
@@ -125,11 +124,11 @@ const Footer = () => {
 
           {/* Contact & Location Section */}
           <div className="mt-12 lg:mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
+
             {/* Contact Information */}
             <div className="space-y-6">
               <h4 className="text-lg font-semibold text-foreground">Get In Touch</h4>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 hover:border-primary/30 transition-colors">
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -150,8 +149,8 @@ const Footer = () => {
                   </div>
                   <div>
                     <h5 className="font-medium text-foreground mb-1">Email Us</h5>
-                    <Link 
-                      href="mailto:powerele9@gmail.com" 
+                    <Link
+                      href="mailto:powerele9@gmail.com"
                       className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
                     >
                       powerele9@gmail.com
@@ -167,14 +166,14 @@ const Footer = () => {
                   <div>
                     <h5 className="font-medium text-foreground mb-1">Call Us</h5>
                     <div className="space-y-1">
-                      <Link 
-                        href="tel:+919334150024" 
+                      <Link
+                        href="tel:+919334150024"
                         className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                       >
                         +91 9334150024
                       </Link>
-                      <Link 
-                        href="tel:+917488022802" 
+                      <Link
+                        href="tel:+917488022802"
                         className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                       >
                         +91 7488022802
@@ -187,20 +186,20 @@ const Footer = () => {
               {/* Legal Links */}
               <div className="pt-4 border-t border-border/50">
                 <div className="flex flex-wrap gap-6">
-                  <Link 
-                    href="#" 
+                  <Link
+                    href="#"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     Privacy Policy
                   </Link>
-                  <Link 
-                    href="#" 
+                  <Link
+                    href="#"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     Terms & Conditions
                   </Link>
-                  <Link 
-                    href="#" 
+                  <Link
+                    href="#"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     Return Policy
@@ -227,15 +226,15 @@ const Footer = () => {
         <div className='border-t border-border/50 bg-muted/30 backdrop-blur-sm'>
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              
+
               {/* Copyright */}
               <div className="text-center sm:text-left">
                 <p className="text-muted-foreground text-sm">
                   &copy; {new Date().getFullYear()} Power Electronics. All rights reserved.
                 </p>
                 <p className="text-muted-foreground/80 text-xs mt-1 flex items-center justify-center sm:justify-start gap-2">
-                  Developed by 
-                  <Link 
+                  Developed by
+                  <Link
                     href="https://instagram.com/trs_saurav"
                     target="_blank"
                     className="inline-flex items-center gap-1 hover:text-primary transition-colors font-medium"
@@ -251,26 +250,26 @@ const Footer = () => {
                 <span className="text-sm font-medium text-muted-foreground">Follow Us</span>
                 <div className="flex gap-2">
                   {[
-                    { 
-                      icon: Instagram, 
-                      href: "https://instagram.com/powerele9", 
+                    {
+                      icon: Instagram,
+                      href: "https://instagram.com/powerele9",
                       color: "hover:bg-pink-500",
                       name: "Instagram"
                     },
-                    { 
-                      icon: Twitter, 
-                      href: "https://twitter.com", 
+                    {
+                      icon: Twitter,
+                      href: "https://twitter.com",
                       color: "hover:bg-blue-400",
                       name: "Twitter"
                     },
-                    { 
-                      icon: Facebook, 
-                      href: "https://facebook.com", 
+                    {
+                      icon: Facebook,
+                      href: "https://facebook.com",
                       color: "hover:bg-blue-600",
                       name: "Facebook"
                     }
                   ].map((social) => (
-                    <Link 
+                    <Link
                       key={social.name}
                       href={social.href}
                       target="_blank"

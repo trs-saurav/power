@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
-import { clerkClient } from '@clerk/nextjs';
-
+import { auth, clerkClient } from '@clerk/nextjs/server';
 export async function POST(request) {
   try {
     // Check authentication

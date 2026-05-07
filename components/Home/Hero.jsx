@@ -1,271 +1,151 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ArrowRight
-} from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { ArrowRight, Zap } from "lucide-react";
+import Link from "next/link";
 
-const HeroSection = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const intervalRef = useRef(null);
+const slides = [
+  {
+    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1920&auto=format&fit=crop",
+    badge: "30+ Years of Trusted Excellence",
+    headline: "Power That\nNever Stops",
+    sub: "Bihar's most trusted name in electrical solutions — wiring, solar, UPS, CCTV and beyond.",
+    cta1: { label: "Get Free Quote", href: "/contact-us" },
+    cta2: { label: "Our Services",   href: "/services" },
+  },
+  {
+    image: "https://images.unsplash.com/photo-1615729947596-a598e5de0ab3?q=80&w=1920&auto=format&fit=crop",
+    badge: "Clean & Renewable Energy",
+    headline: "Go Solar,\nSave More",
+    sub: "Cut electricity bills with premium solar installations from India's leading brands.",
+    cta1: { label: "Solar Quote",     href: "/contact-us" },
+    cta2: { label: "Learn More",      href: "/services" },
+  },
+  {
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=1920&auto=format&fit=crop",
+    badge: "Professional Surveillance",
+    headline: "Secure Every\nCorner",
+    sub: "Expert CCTV installation with CP Plus and Dahua — 24/7 monitoring for homes and businesses.",
+    cta1: { label: "Book Install",    href: "/contact-us" },
+    cta2: { label: "View Products",   href: "/all-products" },
+  },
+];
 
-  const slides = [
-    {
-      title: "Professional Electrical Solutions",
-      description: "Quality electrical services for your home and business with 30+ years of experience.",
-      buttonText: "Get Quote",
-      buttonLink: "/contact-us"
-    },
-    {
-      title: "Solar Power Solutions", 
-      description: "Harness clean solar energy and reduce your electricity bills with our premium installations.",
-      buttonText: "Learn More",
-      buttonLink: "/services"
-    },
-    {
-      title: "Expert Installation & Repair",
-      description: "Professional UPS, battery, and electrical system installation with ongoing support.",
-      buttonText: "Book Service", 
-      buttonLink: "/contact-us"
-    },
-    {
-      title: "Why Shop With Us?",
-      description: "15+ years experience, 10000+ happy customers, 7 days support, and 100% quality guarantee on all products and services.",
-      buttonText: "Shop Now",
-      buttonLink: "/all-products"
-    }
-  ];
+const stats = [
+  { value: "30+", label: "Years Experience" },
+  { value: "15K+", label: "Happy Customers" },
+  { value: "500+", label: "Solar Projects" },
+  { value: "24/7", label: "Support" },
+];
 
-  // Auto-play functionality
-  useEffect(() => {
-    if (isAutoPlaying) {
-      intervalRef.current = setInterval(() => {
-        setCurrentSlide((prev) => {
-          const nextSlide = (prev + 1) % slides.length;
-          return nextSlide;
-        });
-      }, 8000);
-    } else {
-      clearInterval(intervalRef.current);
-    }
+export default function HeroSection() {
+  const [idx, setIdx] = useState(0);
+  const timer = useRef(null);
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isAutoPlaying, slides.length]);
-
-  const nextSlide = () => {
-    setIsAutoPlaying(false);
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-    
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 10000);
+  const restart = () => {
+    clearInterval(timer.current);
+    timer.current = setInterval(() => setIdx(p => (p + 1) % slides.length), 6500);
   };
 
-  const prevSlide = () => {
-    setIsAutoPlaying(false);
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 10000);
-  };
+  useEffect(() => { restart(); return () => clearInterval(timer.current); }, []);
 
-  const goToSlide = (index) => {
-    setIsAutoPlaying(false);
-    setCurrentSlide(index);
-    
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 10000);
-  };
+  const go = i => { setIdx(i); restart(); };
+  const s = slides[idx];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 overflow-hidden">
-      
-      {/* Background Patterns */}
-      <div className="absolute inset-0">
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div 
-            className="w-full h-full"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '60px 60px'
-            }}
-          />
-        </div>
+    <section className="relative w-full h-screen min-h-[600px] overflow-hidden" aria-label="Hero">
 
-        {/* Animated Circles */}
-        <div className="absolute inset-0">
+      {/* ── Background image ── */}
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={idx}
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${s.image})` }}
+          initial={{ opacity: 0, scale: 1.04 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.1, ease: "easeInOut" }}
+          aria-hidden="true"
+        />
+      </AnimatePresence>
+
+      {/* ── Gradient overlay ── */}
+      <div className="absolute inset-0" style={{
+        background: "linear-gradient(to right, rgba(3,7,18,0.88) 0%, rgba(3,7,18,0.65) 55%, rgba(3,7,18,0.3) 100%)"
+      }} aria-hidden="true" />
+
+      {/* ── Content ── */}
+      <div className="relative z-10 h-full flex flex-col justify-center max-w-7xl mx-auto px-6 lg:px-12">
+        <AnimatePresence mode="wait">
           <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.1, 0.2, 0.1],
-            }}
-            transition={{
-              duration: 12,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute top-20 left-20 w-64 h-64 bg-blue-400 rounded-full blur-3xl"
-          />
-          
-          <motion.div
-            animate={{
-              scale: [1.2, 1, 1.2],
-              opacity: [0.08, 0.15, 0.08],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 5
-            }}
-            className="absolute bottom-32 right-32 w-80 h-80 bg-purple-400 rounded-full blur-3xl"
-          />
+            key={idx}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-2xl"
+          >
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full border text-xs font-semibold tracking-widest uppercase"
+              style={{ borderColor: "rgba(251,191,36,0.4)", color: "#fbbf24", background: "rgba(251,191,36,0.08)" }}>
+              <Zap className="w-3 h-3" aria-hidden="true" />
+              {s.badge}
+            </div>
 
-          <motion.div
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.05, 0.12, 0.05],
-            }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 8
-            }}
-            className="absolute top-1/2 left-1/3 w-72 h-72 bg-cyan-400 rounded-full blur-3xl"
-          />
-        </div>
+            {/* Headline */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.08] tracking-tight mb-6"
+              style={{ whiteSpace: "pre-line" }}>
+              {s.headline}
+            </h1>
 
-        {/* Circuit-like lines */}
-        <div className="absolute bottom-10 left-10 opacity-20">
-          <svg width="200" height="100" viewBox="0 0 200 100">
-            <motion.path
-              d="M10 50 L50 50 L70 30 L90 50 L130 50 L150 70 L190 70"
-              stroke="rgba(255,255,255,0.3)"
-              strokeWidth="2"
-              fill="none"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            <motion.circle
-              cx="50"
-              cy="50"
-              r="3"
-              fill="rgba(255,255,255,0.5)"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-          </svg>
-        </div>
+            {/* Sub */}
+            <p className="text-base sm:text-lg text-white/65 leading-relaxed mb-10 max-w-lg">
+              {s.sub}
+            </p>
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/30" />
-      </div>
-      
-      {/* Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center">
-        <div className="container mx-auto px-4 text-center text-white max-w-4xl">
-          
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ 
-                duration: 1.2,
-                ease: "easeInOut" 
-              }}
-            >
-              {/* Title */}
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-                {slides[currentSlide].title}
-              </h1>
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-4">
+              <Link href={s.cta1.href}
+                className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-lg font-semibold text-sm transition-all duration-300 hover:opacity-90 hover:shadow-2xl hover:shadow-amber-500/20"
+                style={{ background: "#f59e0b", color: "#0c0a09" }}>
+                {s.cta1.label}
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              </Link>
+              <Link href={s.cta2.href}
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg font-semibold text-sm text-white transition-all duration-300 hover:bg-white/10"
+                style={{ border: "1.5px solid rgba(255,255,255,0.3)" }}>
+                {s.cta2.label}
+              </Link>
+            </div>
+          </motion.div>
+        </AnimatePresence>
 
-              {/* Description */}
-              <p className="text-lg md:text-xl text-white/90 mb-10 leading-relaxed max-w-3xl mx-auto">
-                {slides[currentSlide].description}
-              </p>
-
-              {/* Button */}
-              <Button 
-                size="lg" 
-                asChild
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 text-lg group mb-12"
-              >
-                <Link href={slides[currentSlide].buttonLink} className="flex items-center">
-                  {slides[currentSlide].buttonText}
-                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
-
-              {/* Stats - Same for all slides */}
-              <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">25+</div>
-                  <div className="text-sm text-white/80 font-medium">Years Experience</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">365 Days</div>
-                  <div className="text-sm text-white/80 font-medium">Support</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-blue-300 mb-1">10000+</div>
-                  <div className="text-sm text-white/80 font-medium">Customers</div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-
-
-      {/* Dots */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-        <div className="flex gap-3">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                index === currentSlide 
-                  ? 'bg-white' 
-                  : 'bg-white/40 hover:bg-white/60'
-              }`}
+        {/* ── Slide dots ── */}
+        <div className="absolute bottom-28 left-6 lg:left-12 flex gap-2" role="tablist" aria-label="Slides">
+          {slides.map((_, i) => (
+            <button key={i} onClick={() => go(i)} role="tab" aria-selected={i === idx}
+              aria-label={`Slide ${i + 1}`}
+              className="transition-all duration-500 rounded-full focus-visible:ring-2 focus-visible:ring-amber-400 outline-none"
+              style={{ width: i === idx ? 28 : 8, height: 8, background: i === idx ? "#f59e0b" : "rgba(255,255,255,0.3)" }}
             />
           ))}
         </div>
       </div>
-    </div>
-  );
-};
 
-export default HeroSection;
+      {/* ── Stats strip ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20"
+        style={{ background: "rgba(3,7,18,0.7)", backdropFilter: "blur(16px)", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-4 divide-x divide-white/10 py-4">
+            {stats.map((st, i) => (
+              <div key={i} className="flex flex-col items-center py-2">
+                <span className="text-xl sm:text-2xl font-bold text-white">{st.value}</span>
+                <span className="text-[11px] sm:text-xs text-white/50 mt-0.5 tracking-wide">{st.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

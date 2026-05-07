@@ -1,205 +1,131 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import ProductCard from "../ProductCard";
+import { motion } from "motion/react";
+import { useInView } from "react-intersection-observer";
+import { ArrowRight, ShoppingCart, Package } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
-import { motion } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import ProductCard from "@/components/ProductCard";
+import Link from "next/link";
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1]
-    }
-  }
-};
-
-const HomeProducts = () => {
+export default function HomeProducts() {
   const { products, router } = useAppContext();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.05 });
 
-  // Get unique categories and select one product from each category
-  const getUniqueProducts = () => {
-    const categories = {};
-    const uniqueProducts = [];
-    
-    products.forEach(product => {
-      if (!categories[product.category] && uniqueProducts.length < 6) {
-        categories[product.category] = true;
-        uniqueProducts.push(product);
-      }
-    });
-    
-    // If we have less than 6 unique categories, fill with remaining products
-    if (uniqueProducts.length < 6) {
-      const remainingProducts = products.filter(product => 
-        !uniqueProducts.find(up => up._id === product._id)
-      );
-      uniqueProducts.push(...remainingProducts.slice(0, 6 - uniqueProducts.length));
+  /* one product per category, max 6 */
+  const featured = (() => {
+    const seen = {};
+    const out = [];
+    for (const p of products) {
+      if (!seen[p.category] && out.length < 6) { seen[p.category] = true; out.push(p); }
     }
-    
-    return uniqueProducts.slice(0, 6);
-  };
-
-  const displayProducts = getUniqueProducts();
-  const totalSlides = displayProducts.length;
-
-  const nextSlide = () => {
-    setCurrentSlide(prev => (prev + 1) % totalSlides);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide(prev => (prev - 1 + totalSlides) % totalSlides);
-  };
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
-  };
+    if (out.length < 6) {
+      for (const p of products) {
+        if (!out.find(x => x._id === p._id) && out.length < 6) out.push(p);
+      }
+    }
+    return out;
+  })();
 
   return (
-    <div className="w-full py-12 md:py-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        
+    <section
+      ref={ref}
+      className="relative w-full py-24 overflow-hidden bg-white"
+      aria-labelledby="products-heading"
+    >
+      {/* Subtle top border accent */}
+      <div className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: "linear-gradient(to right, transparent, #e2e8f0 20%, #e2e8f0 80%, transparent)" }}
+        aria-hidden="true" />
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+
         {/* Header */}
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          variants={itemVariants}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
-          <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-3">
-            Popular Products
-          </h2>
-          <p className="text-muted-foreground text-base md:text-lg">
-            Discover our top Products from different categories
-          </p>
-        </motion.div>
-
-        {/* Products Display */}
         <motion.div
-          initial="hidden"
-          whileInView="visible"
-          variants={itemVariants}
-          viewport={{ once: true }}
-          className="mb-10"
+          className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14"
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.65 }}
         >
-          {/* Desktop View - Uniform Grid */}
-          <div className="hidden md:block">
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6">
-              {displayProducts.slice(0, 6).map((product, index) => (
-                <motion.div
-                  key={product._id || index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="flex justify-center"
-                >
-                  {/* Fixed container for consistent sizing */}
-                  <div className="w-full max-w-[280px] h-full">
-                    <ProductCard product={product} className="h-full" />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-blue-600 mb-3">
+              Featured Products
+            </p>
+            <h2 id="products-heading" className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+              Popular Products
+            </h2>
+            <p className="mt-2 text-slate-500 text-sm sm:text-base max-w-lg">
+              Hand-picked top sellers from our catalog — quality gear from brands you trust.
+            </p>
           </div>
 
-          {/* Mobile View - Single Product Slider */}
-          <div className="md:hidden relative">
-            <div className="overflow-hidden rounded-lg">
-              <div 
-                className="flex transition-transform duration-300 ease-out"
-                style={{
-                  transform: `translateX(-${currentSlide * 100}%)`
-                }}
-              >
-                {displayProducts.map((product, index) => (
-                  <div
-                    key={product._id || index}
-                    className="w-full flex-shrink-0 px-2"
-                  >
-                    {/* Fixed mobile container */}
-                    <div className="flex justify-center">
-                      <div className="w-full max-w-[280px] mx-auto">
-                        <ProductCard product={product} className="h-full" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Navigation Arrows */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full  shadow-lg border flex items-center justify-center hover:scale-110 transition-transform"
-              aria-label="Previous product"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={nextSlide}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full  shadow-lg border flex items-center justify-center hover:scale-110 transition-transform"
-              aria-label="Next product"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-
-            {/* Dots Indicator */}
-            <div className="flex justify-center mt-6 gap-2">
-              {displayProducts.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentSlide 
-                      ? 'bg-primary w-6' 
-                      : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  aria-label={`Go to product ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Product Info */}
-            <div className="text-center mt-4">
-              <p className="text-sm text-muted-foreground">
-                {currentSlide + 1} of {totalSlides} • {displayProducts[currentSlide]?.category}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Call to Action */}
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          variants={itemVariants}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <Button
-            onClick={() => router.push('/all-products')}
-            size="lg"
-            className="group px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          <Link
+            href="/all-products"
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors whitespace-nowrap"
           >
             View All Products
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Button>
-          
-          <p className="text-sm text-muted-foreground mt-3">
-            Explore {products.length}+ electrical products across all categories
-          </p>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </Link>
+        </motion.div>
+
+        {/* Products grid */}
+        {featured.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-5">
+            {featured.map((product, i) => (
+              <motion.div
+                key={product._id || i}
+                initial={{ opacity: 0, y: 24 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          /* Empty state */
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+              <Package className="w-8 h-8 text-slate-400" aria-hidden="true" />
+            </div>
+            <p className="text-slate-500 text-sm">Loading products…</p>
+          </div>
+        )}
+
+        {/* CTA strip */}
+        <motion.div
+          className="mt-16 rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6"
+          style={{
+            background: "linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)",
+            backgroundImage: `linear-gradient(135deg,rgba(15,23,42,0.97) 0%,rgba(30,58,138,0.97) 100%), url(https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=800&auto=format&fit=crop)`,
+            backgroundSize: "cover",
+            backgroundBlend: "overlay",
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.4 }}
+        >
+          <div className="text-center sm:text-left">
+            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#fbbf24" }}>
+              Full Catalog
+            </p>
+            <h3 className="text-xl sm:text-2xl font-bold text-white">
+              {products.length > 0 ? `Explore ${products.length}+ Products` : "Explore Our Full Range"}
+            </h3>
+            <p className="text-white/55 text-sm mt-1">
+              UPS · Solar · CCTV · Batteries · Wiring · Stabilizers
+            </p>
+          </div>
+
+          <button
+            onClick={() => router.push("/all-products")}
+            className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-lg font-semibold text-sm flex-shrink-0 transition-all duration-300 hover:opacity-90 hover:shadow-2xl hover:shadow-amber-500/20"
+            style={{ background: "#f59e0b", color: "#0c0a09" }}
+          >
+            <ShoppingCart className="w-4 h-4" aria-hidden="true" />
+            Shop Now
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </button>
         </motion.div>
       </div>
-    </div>
+    </section>
   );
-};
-
-export default HomeProducts;
+}

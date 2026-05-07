@@ -1,311 +1,227 @@
 "use client";
 
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import { 
-  Zap, 
   Shield, 
+  Lightbulb, 
+  CheckCircle2, 
+  Lock, 
+  Wrench, 
   Sun, 
   Camera, 
-  Target, 
-  Rocket, 
-  Heart,
-  Users,
-  Calendar,
-  Award,
-  ArrowRight,
-  Sparkles,
-  CheckCircle2,
-  TrendingUp
+  Zap,
+  ArrowRight
 } from "lucide-react";
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } },
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
 };
 
-const staggerContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: "easeOut" } },
-};
-
-export default function AboutPage() {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    return null;
-  }
-
-  const stats = [
-    { 
-      icon: Calendar, 
-      value: "2008", 
-      label: "Established", 
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-blue-50 dark:bg-blue-950/30"
-    },
-    { 
-      icon: Users, 
-      value: "10K+", 
-      label: "Happy Customers", 
-      color: "from-emerald-500 to-teal-500",
-      bgColor: "bg-emerald-50 dark:bg-emerald-950/30"
-    },
-    { 
-      icon: Award, 
-      value: "30+", 
-      label: "Overall Years Experience", 
-      color: "from-violet-500 to-purple-500",
-      bgColor: "bg-violet-50 dark:bg-violet-950/30"
-    }
-  ];
-
-
-
-  const achievements = [
-    { label: "Project Success Rate", value: "99.8%" },
-    { label: "Customer Retention", value: "95%" },
-    { label: "Green Energy Impact", value: "1 MW+" }
-  ];
-
+export default function AboutUsPage() {
   return (
-    
-    <div className="relative min-h-screen">
-      {/* Animated Background */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-violet-50/20 dark:from-slate-950 dark:via-blue-950/20 dark:to-violet-950/10"></div>
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-violet-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-emerald-400/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+    <main className="min-h-screen bg-[#fbf8ff] text-slate-900 font-sans antialiased overflow-hidden">
+      
+      {/* ── 1. SEO HERO SECTION ── */}
+      <header className="relative w-full pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 flex flex-col items-center justify-center text-center">
+        {/* Background Image with Deep Blue Overlay */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?q=80&w=2070&auto=format&fit=crop"
+            alt="Advanced industrial infrastructure facility"
+            fill
+            priority
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[#1E40AF]/85 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#001453]/60 to-[#1a1b22]/90" />
+        </div>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="text-center"
+        <motion.div 
+          initial="hidden" animate="visible" variants={stagger}
+          className="relative z-10 max-w-4xl mx-auto"
+        >
+          <motion.h1 
+            variants={fadeUp} 
+            className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight tracking-tight mb-6"
           >
-
-
-            <motion.h1 
-              variants={fadeInUp}
-              className="text-5xl md:text-7xl font-black mb-6"
+            Engineering the Future of Power
+          </motion.h1>
+          <motion.p 
+            variants={fadeUp} 
+            className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed mb-10"
+          >
+            Three decades of established excellence, delivering high-specification industrial and commercial electrical infrastructure.
+          </motion.p>
+          <motion.div variants={fadeUp}>
+            <Link 
+              href="#contact" 
+              className="inline-flex items-center justify-center bg-[#F59E0B] text-slate-900 font-bold px-8 py-4 rounded-lg shadow-lg hover:bg-amber-400 transition-colors focus:ring-4 focus:ring-amber-500/50"
             >
-              <span className="bg-gradient-to-r from-slate-900 via-blue-800 to-violet-800 dark:from-white dark:via-blue-200 dark:to-violet-200 bg-clip-text text-transparent">
-                ABOUT
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-blue-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">
-                Power Electronics
-              </span>
-            </motion.h1>
+              Partner with Excellence <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+          </motion.div>
+        </motion.div>
+      </header>
 
-            <motion.p 
-              variants={fadeInUp}
-              className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-4xl mx-auto leading-relaxed font-light"
-            >
-              Pioneering the future of power and security solutions with 
-              <span className="font-semibold text-blue-600"> cutting-edge technology</span> and 
-              <span className="font-semibold text-violet-600"> unmatched expertise</span>
+      {/* ── 2. OUR LEGACY (History) ── */}
+      <section className="py-20 lg:py-28 px-6 bg-white">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <motion.div 
+            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={stagger}
+          >
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold text-[#1E40AF] mb-6">
+              Three Decades of Technical Excellence
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-lg text-slate-600 leading-relaxed mb-6">
+              Founded in 1994, Industrial Electrical Solutions began as a specialized contractor focusing on complex industrial installations. Over the past 30 years, we have evolved into a multi-disciplinary firm, pioneering advancements in power distribution and smart infrastructure.
             </motion.p>
-
-            <motion.div 
-              variants={fadeInUp}
-              className="flex flex-wrap justify-center gap-4 mt-8"
-            >
-              {achievements.map((achievement, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ scale: 1.05 }}
-                  className="px-6 py-3 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-lg"
-                >
-                  <div className="text-2xl font-bold text-slate-800 dark:text-white">
-                    {achievement.value}
-                  </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    {achievement.label}
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+            <motion.p variants={fadeUp} className="text-lg text-slate-600 leading-relaxed">
+              Our legacy is built on mathematical consistency, strict adherence to safety protocols, and an unwavering commitment to operational clarity. We treat every project as a critical component, ensuring absolute reliability for facility managers and high-end residential clients alike.
+            </motion.p>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <section className="relative py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          {/* Bento Grid Layout */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={staggerContainer}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-20"
-          >
-            {/* Story Card - Large */}
-            <motion.div
-              variants={fadeInUp}
-              className="lg:col-span-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-700/50 rounded-3xl p-8 md:p-12 shadow-2xl"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-violet-500 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-3xl font-bold text-slate-800 dark:text-white">Our Journey</h2>
-              </div>
-
-              <div className="space-y-6 text-lg text-slate-700 dark:text-slate-300 leading-relaxed">
-                <p>
-                  <span className="font-semibold text-blue-600">Power Electronics</span> has been at the 
-                  forefront of technological innovation for over <span className="font-semibold text-violet-600">three decades</span>, 
-                  transforming how businesses and homes experience power and security solutions.
-                </p>
-                <p>
-                  Our commitment to excellence has earned us the trust of 
-                  <span className="font-semibold text-emerald-600"> 100,000+ customers</span> worldwide, 
-                  establishing us as industry leaders in sustainable energy and intelligent security systems.
-                </p>
-                <div className="grid md:grid-cols-2 gap-4 mt-8">
-                  <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-950/20 dark:to-violet-950/20 rounded-2xl">
-                    <CheckCircle2 className="w-5 h-5 text-blue-600" />
-                    <span className="font-medium">Innovation-Driven Solutions</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-2xl">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                    <span className="font-medium">Sustainable Technology</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Stats Card */}
-            <motion.div
-              variants={fadeInUp}
-              className="lg:col-span-4 space-y-6"
-            >
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ scale: 1.02, x: 5 }}
-                  className={`${stat.bgColor} backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-6 shadow-xl`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                      <stat.icon className="w-7 h-7 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold text-slate-800 dark:text-white">
-                        {stat.value}
-                      </div>
-                      <div className="text-slate-600 dark:text-slate-400 font-medium">
-                        {stat.label}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          {/* Vision & Mission - Modern Cards */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="grid md:grid-cols-2 gap-8 mb-20"
-          >
-            <motion.div
-              variants={fadeInUp}
-              whileHover={{ y: -10, scale: 1.02 }}
-              className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-violet-600 rounded-3xl p-8 shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-violet-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <Target className="w-8 h-8 text-white" />
-                  <h3 className="text-2xl font-bold text-white">Our Vision</h3>
-                </div>
-                <p className="text-blue-100 leading-relaxed text-lg">
-                  To revolutionize global energy infrastructure through AI-powered solutions, 
-                  sustainable technologies, and intelligent automation that creates a carbon-neutral, 
-                  secure, and connected world.
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              variants={fadeInUp}
-              whileHover={{ y: -10, scale: 1.02 }}
-              className="group relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-8 shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/20 to-teal-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <Rocket className="w-8 h-8 text-white" />
-                  <h3 className="text-2xl font-bold text-white">Our Mission</h3>
-                </div>
-                <p className="text-emerald-100 leading-relaxed text-lg">
-                  Delivering next-generation power and security ecosystems through cutting-edge research, 
-                  sustainable practices, and customer-centric innovation that transforms industries 
-                  and communities worldwide.
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Services Grid - Enhanced */}
           
-
-          {/* Core Values - Modern Pill Design */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center"
+          <motion.figure 
+            initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
+            className="relative h-[400px] lg:h-[500px] w-full rounded-2xl overflow-hidden shadow-2xl"
           >
-            <motion.div variants={fadeInUp} className="mb-12">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Heart className="w-8 h-8 text-red-500" />
-                <h2 className="text-4xl font-bold text-slate-800 dark:text-white">Core Values</h2>
-              </div>
-              <p className="text-xl text-slate-600 dark:text-slate-300">
-                The principles that drive our innovation and excellence
-              </p>
-            </motion.div>
+            <Image 
+              src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=2070&auto=format&fit=crop"
+              alt="Engineering team reviewing technical blueprints"
+              fill
+              className="object-cover"
+            />
+          </motion.figure>
+        </div>
+      </section>
 
-            <motion.div variants={staggerContainer} className="flex flex-wrap justify-center gap-4">
-              {["Innovation Excellence", "Sustainable Future", "Customer Obsession", "Integrity First", "Global Impact"].map((value, index) => (
-                <motion.div
-                  key={value}
-                  variants={scaleIn}
-                  whileHover={{ 
-                    scale: 1.1, 
-                    backgroundColor: "rgb(59, 130, 246)",
-                    color: "white"
-                  }}
-                  className="px-8 py-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer text-lg"
-                >
-                  {value}
-                </motion.div>
-              ))}
-            </motion.div>
+      {/* ── 3. MISSION & VISION ── */}
+      <section className="py-20 bg-[#f4f2fc]">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+            className="grid md:grid-cols-2 gap-8"
+          >
+            <motion.article variants={fadeUp} className="bg-white p-10 rounded-2xl shadow-sm border border-[#e8e7f1]">
+              <div className="w-14 h-14 bg-[#e8e7f1] rounded-xl flex items-center justify-center mb-6">
+                <TargetIcon className="w-7 h-7 text-[#1E40AF]" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">Our Mission</h2>
+              <p className="text-lg text-slate-600 leading-relaxed">
+                To provide innovative, safe, and sustainable electrical solutions that empower industries to operate at peak efficiency with zero downtime.
+              </p>
+            </motion.article>
+
+            <motion.article variants={fadeUp} className="bg-[#1E40AF] p-10 rounded-2xl shadow-lg border border-[#00288e] text-white">
+              <div className="w-14 h-14 bg-[#00288e] rounded-xl flex items-center justify-center mb-6">
+                <GlobeIcon className="w-7 h-7 text-blue-200" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">Our Vision</h2>
+              <p className="text-lg text-blue-100 leading-relaxed">
+                To serve as the global benchmark for electrical infrastructure, setting standard in technical precision and corporate reliability.
+              </p>
+            </motion.article>
           </motion.div>
         </div>
       </section>
-    </div>
+
+      {/* ── 4. CORE VALUES ── */}
+      <section className="py-20 lg:py-28 bg-white border-t border-[#e8e7f1]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1E40AF] mb-4">Core Values</h2>
+            <p className="text-lg text-slate-600">The principles that guarantee our operational clarity.</p>
+          </div>
+
+          <motion.div 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {[
+              { icon: Shield, title: "Integrity", desc: "Uncompromising honesty in every technical assessment." },
+              { icon: Lightbulb, title: "Innovation", desc: "Forward-thinking design for modern infrastructure." },
+              { icon: CheckCircle2, title: "Reliability", desc: "Systems engineered for absolute uptime." },
+              { icon: Lock, title: "Safety", desc: "Strict adherence to global safety standards." }
+            ].map((val, idx) => (
+              <motion.article key={idx} variants={fadeUp} className="flex flex-col items-center text-center p-6">
+                <div className="w-20 h-20 rounded-full bg-[#f4f2fc] flex items-center justify-center mb-6">
+                  <val.icon className="w-8 h-8 text-[#1E40AF]" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">{val.title}</h3>
+                <p className="text-slate-600 leading-relaxed">{val.desc}</p>
+              </motion.article>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── 5. SERVICES SUMMARY ── */}
+      <section className="py-20 lg:py-28 bg-[#1a1b22] text-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Specialized Solutions</h2>
+              <p className="text-lg text-slate-400">Comprehensive capabilities for industrial demands.</p>
+            </div>
+            <Link 
+              href="/#services" 
+              className="text-[#F59E0B] font-bold hover:text-amber-400 flex items-center transition-colors"
+            >
+              Explore All Services <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+          </div>
+
+          <motion.div 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {[
+              { icon: Wrench, title: "Industrial Wiring", desc: "Heavy-duty power distribution." },
+              { icon: Sun, title: "Solar Solutions", desc: "Scalable photovoltaic networks." },
+              { icon: Camera, title: "CCTV Systems", desc: "Integrated security monitoring." },
+              { icon: Zap, title: "UPS Infrastructure", desc: "Uninterruptible power supply." }
+            ].map((service, idx) => (
+              <motion.article 
+                key={idx} variants={fadeUp} 
+                className="bg-[#2f3037] border border-[#444653] p-8 rounded-xl hover:border-[#1E40AF] hover:bg-[#1E40AF]/10 transition-colors"
+              >
+                <service.icon className="w-10 h-10 text-[#F59E0B] mb-6" />
+                <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
+                <p className="text-slate-400">{service.desc}</p>
+              </motion.article>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+    </main>
   );
+}
+
+// Minimal Icons for Mission & Vision to avoid importing too many things
+function TargetIcon(props) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  )
+}
+
+function GlobeIcon(props) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  )
 }
