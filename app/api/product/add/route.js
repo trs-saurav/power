@@ -1,7 +1,8 @@
 import connectDB from "@/config/db";
 import authSeller from "@/lib/authSeller";
 import Product from "@/models/product";
-import { getAuth } from "@clerk/nextjs/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { v2 as cloudinary } from "cloudinary";
 import { NextResponse } from "next/server";
 
@@ -18,8 +19,12 @@ cloudinary.config({
 export async function POST(request) {
   try {
     // Auth
-    const { userId } = getAuth(request);
-    const isAdmin = await authSeller(userId);
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const isAdmin = await authSeller(session.user.email);
     if (!isAdmin) {
       return NextResponse.json({ success: false, message: "Not authorized" }, { status: 401 });
     }

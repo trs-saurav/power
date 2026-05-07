@@ -1,7 +1,8 @@
+'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { useAppContext } from '@/context/AppContext'
-import { useAuth, useUser } from '@clerk/nextjs'
+import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
@@ -27,14 +28,14 @@ import {
 
 const Navbar = () => {
   const { router } = useAppContext()
-  const { signOut } = useAuth()
-  const { user } = useUser()
+  const { data: session } = useSession()
+  const user = session?.user
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLogout = async () => {
     try {
       setIsLoading(true)
-      await signOut()
+      await signOut({ redirect: false })
       toast.success('Logged out successfully')
       router.push('/')
     } catch (error) {
@@ -107,14 +108,14 @@ const Navbar = () => {
                 className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded-xl transition-all duration-200"
               >
                 <Avatar className="w-9 h-9 border-2 border-border/50">
-                  <AvatarImage src={user?.imageUrl} alt={user?.fullName || 'User'} />
+                  <AvatarImage src={user?.image} alt={user?.name || 'User'} />
                   <AvatarFallback className="bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-medium">
-                    {user?.fullName?.charAt(0) || 'A'}
+                    {user?.name?.charAt(0) || 'A'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block text-left">
                   <p className="text-sm font-medium text-foreground">
-                    {user?.fullName || 'Admin User'}
+                    {user?.name || 'Admin User'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Administrator

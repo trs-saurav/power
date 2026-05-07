@@ -20,12 +20,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 
 const CreateUserPage = () => {
-  const { userId, isLoaded } = useAuth();
-  const { user } = useUser();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,11 +32,11 @@ const CreateUserPage = () => {
     lastName: '',
     email: '',
     phone: '',
-    role: 'clerk'
+    role: 'user'
   });
 
   // Check if current user is admin
-  const isAdmin = user?.publicMetadata?.role === 'admin';
+  const isAdmin = session?.user?.role === 'admin';
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -49,7 +48,7 @@ const CreateUserPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!isLoaded || !userId) {
+    if (status !== 'authenticated') {
       toast.error('Authentication not loaded. Please refresh the page.');
       return;
     }
@@ -80,7 +79,7 @@ const CreateUserPage = () => {
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
         role: formData.role,
-        createdBy: userId
+        createdBy: session.user.email
       };
 
       console.log('Sending request with body:', requestBody);
@@ -113,7 +112,7 @@ const CreateUserPage = () => {
   };
 
   // Show loading if auth is not loaded
-  if (!isLoaded) {
+  if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full"></div>
@@ -274,10 +273,10 @@ const CreateUserPage = () => {
                           <Badge variant="destructive" className="text-xs">Full Access</Badge>
                         </div>
                       </SelectItem>
-                      <SelectItem value="clerk">
+                      <SelectItem value="user">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-blue-500" />
-                          <span>Clerk</span>
+                          <span>User</span>
                           <Badge variant="secondary" className="text-xs">Limited Access</Badge>
                         </div>
                       </SelectItem>
@@ -291,7 +290,7 @@ const CreateUserPage = () => {
                   <AlertDescription>
                     <strong>Admin:</strong> Full system access including user management, settings, and all data.
                     <br />
-                    <strong>Clerk:</strong> Limited access to orders, products, and customer management only.
+                    <strong>User:</strong> Limited access to orders, products, and customer management only.
                   </AlertDescription>
                 </Alert>
 

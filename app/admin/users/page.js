@@ -17,10 +17,10 @@ import {
   XCircle
 } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 
 const UsersPage = () => {
-  const { getToken } = useAuth();
+  const { data: session } = useSession();
   const [users, setUsers] = useState([]);
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,15 +31,9 @@ const UsersPage = () => {
 
   const fetchUsersAndInvitations = async () => {
     try {
-      const token = await getToken();
-      
       const [usersResponse, invitationsResponse] = await Promise.all([
-        fetch('/api/admin/users', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('/api/admin/invitations', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+        fetch('/api/admin/users'),
+        fetch('/api/admin/invitations')
       ]);
 
       if (usersResponse.ok) {
@@ -63,7 +57,7 @@ const UsersPage = () => {
     if (role === 'admin') {
       return <Badge variant="destructive" className="text-xs">Admin</Badge>;
     }
-    return <Badge variant="secondary" className="text-xs">Clerk</Badge>;
+    return <Badge variant="secondary" className="text-xs">User</Badge>;
   };
 
   const getStatusBadge = (status) => {

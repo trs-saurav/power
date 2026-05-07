@@ -25,7 +25,7 @@ const nextConfig = {
         },
     },
     experimental: {
-        serverComponentsExternalPackages: ['cloudinary'],
+        serverComponentsExternalPackages: ['cloudinary', 'next-auth', 'openid-client'],
     },
 };
 

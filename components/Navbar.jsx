@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
-import { useClerk, UserButton } from "@clerk/nextjs";
+import { signIn, useSession } from "next-auth/react";
 import { ModeToggle } from "./extra/ModeToggle";
 import { 
   Menu, X, User, Home, Store, Info, Phone, 
@@ -22,7 +22,7 @@ const navItems = [
 
 export default function Navbar() {
   const { router, user } = useAppContext();
-  const { openSignIn } = useClerk();
+  const { data: session } = useSession();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -96,24 +96,36 @@ export default function Navbar() {
             <ModeToggle />
             
             <div className="hidden sm:block">
-              {user ? (
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-9 h-9 rounded-full ring-2 ring-amber-100 dark:ring-slate-800 transition-all hover:scale-105",
-                      userButtonPopoverCard: "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl",
-                    }
-                  }}
-                >
-                  <UserButton.MenuItems>
-                    <UserButton.Action label="Products" labelIcon={<Package className="w-4 h-4"/>} onClick={() => router.push('/all-products')} />
-                    <UserButton.Action label="Cart" labelIcon={<ShoppingBag className="w-4 h-4"/>} onClick={() => router.push('/cart')} />
-                    <UserButton.Action label="Orders" labelIcon={<Store className="w-4 h-4"/>} onClick={() => router.push('/my-orders')} />
-                  </UserButton.MenuItems>
-                </UserButton>
+              {session?.user ? (
+                <div className="flex items-center gap-3">
+                  <Link href="/settings" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Settings">
+                    <Settings className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                  </Link>
+                  <Link href="/settings/profile" className="group">
+                    <div className="w-10 h-10 rounded-full ring-2 ring-amber-300 dark:ring-amber-600 overflow-hidden bg-slate-200 dark:bg-slate-700 flex items-center justify-center hover:ring-amber-400 dark:hover:ring-amber-500 transition-all">
+                      {session.user.image ? (
+                        <Image 
+                          src={session.user.image} 
+                          alt={session.user.name || 'User'} 
+                          width={40} 
+                          height={40}
+                          className="w-full h-full object-cover"
+                          priority
+                          onError={(e) => {
+                            console.log('Image failed to load');
+                          }}
+                        />
+                      ) : (
+                        <span className="text-lg font-bold text-slate-600 dark:text-slate-300">
+                          {session.user.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                </div>
               ) : (
                 <button
-                  onClick={openSignIn}
+                  onClick={() => router.push('/sign-in')}
                   className="px-5 py-2 rounded-full text-sm font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-all hover:shadow-lg flex items-center gap-2"
                 >
                   <User className="w-4 h-4" />
@@ -187,14 +199,40 @@ export default function Navbar() {
               </div>
 
               <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-                {user ? (
+                {session?.user ? (
                   <div className="flex flex-col gap-3">
-                    <UserButton />
-                    <p className="text-sm font-medium text-slate-500 text-center">Logged In</p>
+                    <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-lg">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                      {session.user.image ? (
+                        <Image 
+                          src={session.user.image} 
+                          alt={session.user.name || 'User'} 
+                          width={40} 
+                          height={40}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-lg font-semibold text-slate-600 dark:text-slate-300">
+                          {session.user.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{session.user.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{session.user.email}</p>
+                      </div>
+                    </div>
+                    <Link href="/settings" className="w-full py-2 text-center rounded-lg font-semibold bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Settings
+                    </Link>
+                    <Link href="/my-orders" className="w-full py-2 text-center rounded-lg font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors">
+                      My Orders
+                    </Link>
                   </div>
                 ) : (
                   <button
-                    onClick={() => { setMobileMenuOpen(false); openSignIn(); }}
+                    onClick={() => { setMobileMenuOpen(false); router.push('/sign-in'); }}
                     className="w-full py-3.5 rounded-xl font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
                   >
                     <User className="w-5 h-5" />

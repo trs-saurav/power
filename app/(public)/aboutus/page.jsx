@@ -59,7 +59,7 @@ export default function AboutUsPage() {
             variants={fadeUp} 
             className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed mb-10"
           >
-            Three decades of established excellence, delivering high-specification industrial and commercial electrical infrastructure.
+            Decades of established excellence, delivering high-specification industrial and commercial electrical infrastructure.
           </motion.p>
           <motion.div variants={fadeUp}>
             <Link 
@@ -79,10 +79,10 @@ export default function AboutUsPage() {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={stagger}
           >
             <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold text-[#1E40AF] mb-6">
-              Three Decades of Technical Excellence
+              Decades of Technical Excellence
             </motion.h2>
             <motion.p variants={fadeUp} className="text-lg text-slate-600 leading-relaxed mb-6">
-              Founded in 1994, Industrial Electrical Solutions began as a specialized contractor focusing on complex industrial installations. Over the past 30 years, we have evolved into a multi-disciplinary firm, pioneering advancements in power distribution and smart infrastructure.
+              Founded in 2008, Industrial Electrical Solutions began as a specialized contractor focusing on complex industrial installations. Over the past 30 years, we have evolved into a multi-disciplinary firm, pioneering advancements in power distribution and smart infrastructure.
             </motion.p>
             <motion.p variants={fadeUp} className="text-lg text-slate-600 leading-relaxed">
               Our legacy is built on mathematical consistency, strict adherence to safety protocols, and an unwavering commitment to operational clarity. We treat every project as a critical component, ensuring absolute reliability for facility managers and high-end residential clients alike.

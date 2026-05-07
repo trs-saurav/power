@@ -1,6 +1,7 @@
 // app/api/order/update/route.js
-import { getAuth } from "@clerk/nextjs/server";
 import connectDB from "@/config/db";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Order from "@/models/order";
 import User from "@/models/user";
 import { inngest } from "@/config/inngest";
@@ -9,8 +10,11 @@ import { NextResponse } from "next/server";
 
 export async function PUT(request) {
     try {
-
-        const { userId } = getAuth(request);
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.email) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+        const userId = session.user.email;
         const body = await request.json();
         const { 
             orderId, 
@@ -23,15 +27,6 @@ export async function PUT(request) {
             expectedDeliveryDate,
             cancellationReason
         } = body;
-
-    
-
-        if (!userId) {
-            return NextResponse.json(
-                { success: false, message: "Authentication required" },
-                { status: 401 }
-            );
-        }
 
         if (!orderId) {
             return NextResponse.json(

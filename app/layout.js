@@ -1,10 +1,7 @@
 // app/layout.js
 import { Outfit } from 'next/font/google'
 import './globals.css'
-import { AppContextProvider } from '@/context/AppContext'
-import { Toaster } from 'react-hot-toast'
-import { ClerkProvider } from '@clerk/nextjs'
-import { ThemeProvider } from '@/components/theme-provider'
+import { Providers } from './providers'
 
 const outfit = Outfit({ subsets: ['latin'], weight: ['300','400','500'] })
 
@@ -80,15 +77,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${outfit.className} antialiased bg-background text-foreground`}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <Toaster toastOptions={{ className: 'bg-background text-foreground border border-border' }} />
-            <AppContextProvider>{children}</AppContextProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${outfit.className} antialiased bg-background text-foreground`}>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
   )
 }
