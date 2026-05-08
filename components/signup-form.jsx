@@ -89,20 +89,15 @@ export function SignupForm({
   const handleGoogleSignUp = async () => {
     try {
       setIsLoading(true)
-      const result = await signIn('google', {
-        redirect: false,
+      // For OAuth providers, use redirect: true to allow proper OAuth callback flow
+      await signIn('google', {
+        redirect: true,
         callbackUrl: '/admin',
       })
-      if (result?.error) {
-        toast.error(result.error)
-      } else if (result?.ok) {
-        toast.success('Signed up successfully')
-        router.push('/admin')
-      }
+      // Note: The function will redirect, so code after this won't execute for successful OAuth
     } catch (error) {
       console.error('Sign up error:', error)
-      toast.error('Failed to sign up')
-    } finally {
+      toast.error('Failed to sign up with Google')
       setIsLoading(false)
     }
   }
