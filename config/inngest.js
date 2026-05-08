@@ -7,46 +7,57 @@ import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, sendWelcomeEmai
 
 export const inngest = new Inngest({ id: "power-electronics" });
 
-// User sync functions remain unchanged...
+// User creation function (triggered from NextAuth signup endpoint)
 export const syncUserCreation = inngest.createFunction(
     {
-        id: 'sync-user-from-clerk'
-    },
-    { 
-        event: 'clerk/user.created'
+        id: 'sync-user-creation',
+        triggers: [{ event: 'user/signup' }]
     },
     async ({event}) => {
         try {
-            const {id, first_name, last_name, email_addresses, image_url} = event.data;
+            const { userId, email, firstName, lastName, name, imageUrl } = event.data;
             
             const userData = {
-                _id: id,
-                email: email_addresses[0]?.email_address,
-                name: `${first_name || ''} ${last_name || ''}`.trim(),
-                firstName: first_name,
-                lastName: last_name,
-                imageUrl: image_url,
-                emailAddresses: email_addresses
+                _id: userId,
+                email: email,
+                name: name || `${firstName || ''} ${lastName || ''}`.trim(),
+                firstName: firstName,
+                lastName: lastName,
+                imageUrl: imageUrl || null,
+                createdAt: new Date()
             };
             
             await connectDB();
-            const createdUser = await User.create(userData);
             
-            // Send welcome email
-            if (userData.email) {
-                try {
-                    await sendWelcomeEmail(userData.email, userData.name);
-                    console.log('✅ Welcome email sent to new user:', userData.email);
-                } catch (emailError) {
-                    console.error('❌ Failed to send welcome email:', emailError);
+            // Check if user already exists
+            let existingUser = await User.findById(userId);
+            if (!existingUser) {
+                const createdUser = await User.create(userData);
+                console.log('✅ User created in database:', createdUser._id);
+                
+                // Send welcome email
+                if (userData.email) {
+                    try {
+                        await sendWelcomeEmail(userData.email, userData.name);
+                        console.log('✅ Welcome email sent to new user:', userData.email);
+                    } catch (emailError) {
+                        console.error('❌ Failed to send welcome email:', emailError);
+                    }
                 }
+                
+                return {
+                    success: true,
+                    userId: createdUser._id,
+                    message: 'User created successfully'
+                };
+            } else {
+                console.log('ℹ️ User already exists:', userId);
+                return {
+                    success: true,
+                    userId: existingUser._id,
+                    message: 'User already exists'
+                };
             }
-            
-            return {
-                success: true,
-                userId: createdUser._id,
-                message: 'User created successfully'
-            };
         } catch (error) {
             console.error('Error in syncUserCreation:', error);
             throw error;
@@ -54,35 +65,42 @@ export const syncUserCreation = inngest.createFunction(
     }
 );
 
+// User update function (triggered from NextAuth profile update endpoint)
 export const syncUserUpdate = inngest.createFunction(
     {
-        id: 'update-user-from-clerk'
-    },
-    {
-        event: 'clerk/user.updated'
+        id: 'sync-user-update',
+        triggers: [{ event: 'user/update' }]
     },
     async ({event}) => {
         try {
-            const {id, first_name, last_name, email_addresses, image_url} = event.data;
+            const { userId, email, firstName, lastName, name, imageUrl } = event.data;
             
             const userData = {
-                email: email_addresses[0]?.email_address,
-                name: `${first_name || ''} ${last_name || ''}`.trim(),
-                firstName: first_name,
-                lastName: last_name,
-                imageUrl: image_url,
-                emailAddresses: email_addresses,
+                email: email,
+                name: name || `${firstName || ''} ${lastName || ''}`.trim(),
+                firstName: firstName,
+                lastName: lastName,
+                imageUrl: imageUrl || null,
                 updatedAt: new Date()
             };
             
             await connectDB();
-            const updatedUser = await User.findByIdAndUpdate(id, userData, { new: true });
+            const updatedUser = await User.findByIdAndUpdate(userId, userData, { new: true });
             
-            return {
-                success: true,
-                userId: updatedUser?._id,
-                message: 'User updated successfully'
-            };
+            if (updatedUser) {
+                console.log('✅ User updated in database:', userId);
+                return {
+                    success: true,
+                    userId: updatedUser._id,
+                    message: 'User updated successfully'
+                };
+            } else {
+                console.log('⚠️ User not found for update:', userId);
+                return {
+                    success: false,
+                    message: 'User not found'
+                };
+            }
         } catch (error) {
             console.error('Error in syncUserUpdate:', error);
             throw error;
@@ -90,20 +108,20 @@ export const syncUserUpdate = inngest.createFunction(
     }
 );
 
+// User deletion function (triggered from NextAuth logout/account deletion)
 export const syncUserDeletion = inngest.createFunction( 
     {
-        id: 'delete-user-from-clerk'
-    },
-    {
-        event: 'clerk/user.deleted'
+        id: 'sync-user-deletion',
+        triggers: [{ event: 'user/delete' }]
     },
     async ({event}) => {
         try {
-            const {id} = event.data;
+            const { userId } = event.data;
             await connectDB();
             
+            // Update all orders to mark them as from deleted user
             await Order.updateMany(
-                { userId: id },
+                { userId: userId },
                 { 
                     $set: { 
                         userId: 'deleted-user',
@@ -113,13 +131,23 @@ export const syncUserDeletion = inngest.createFunction(
                 }
             );
             
-            await User.findByIdAndDelete(id);
+            // Delete the user
+            const deletedUser = await User.findByIdAndDelete(userId);
             
-            return {
-                success: true,
-                userId: id,
-                message: 'User deleted successfully'
-            };
+            if (deletedUser) {
+                console.log('✅ User deleted from database:', userId);
+                return {
+                    success: true,
+                    userId: userId,
+                    message: 'User deleted successfully'
+                };
+            } else {
+                console.log('⚠️ User not found for deletion:', userId);
+                return {
+                    success: false,
+                    message: 'User not found'
+                };
+            }
         } catch (error) {
             console.error('Error in syncUserDeletion:', error);
             throw error;
@@ -132,10 +160,8 @@ export const syncUserDeletion = inngest.createFunction(
 export const createOrder = inngest.createFunction(
     {
         id: 'create-order',
-        retries: 3
-    },
-    {
-        event: 'order/create'
+        retries: 3,
+        triggers: [{ event: 'order/create' }]
     },
     async ({event, step}) => {
         console.log('🔥 Inngest createOrder function triggered');
@@ -286,10 +312,8 @@ export const createOrder = inngest.createFunction(
 export const processOrderCreated = inngest.createFunction(
     {
         id: 'process-order-created',
-        retries: 2
-    },
-    {
-        event: 'order/created'
+        retries: 2,
+        triggers: [{ event: 'order/created' }]
     },
     async ({event}) => {
         try {
@@ -316,10 +340,8 @@ export const processOrderCreated = inngest.createFunction(
 export const handleOrderStatusUpdate = inngest.createFunction(
     {
         id: 'handle-order-status-update',
-        retries: 3
-    },
-    {
-        event: 'order/status-updated'
+        retries: 3,
+        triggers: [{ event: 'order/status-updated' }]
     },
     async ({event}) => {
         try {
@@ -410,10 +432,8 @@ export const handleOrderStatusUpdate = inngest.createFunction(
 export const handleOrderCancellation = inngest.createFunction(
     {
         id: 'handle-order-cancellation',
-        retries: 2
-    },
-    {
-        event: 'order/cancelled'
+        retries: 2,
+        triggers: [{ event: 'order/cancelled' }]
     },
     async ({event}) => {
         try {

@@ -2,6 +2,7 @@ import connectDB from "@/config/db";
 import User from "@/models/user";
 import bcryptjs from "bcryptjs";
 import { NextResponse } from "next/server";
+import { triggerUserSignup } from "@/lib/inngestEvents";
 
 export async function POST(request) {
   try {
@@ -48,6 +49,16 @@ export async function POST(request) {
     });
 
     await newUser.save();
+
+    // Trigger Inngest user signup event (for welcome email and user sync)
+    await triggerUserSignup({
+      userId: email,
+      email: email,
+      name: name,
+      firstName: name.split(' ')[0] || '',
+      lastName: name.split(' ').slice(1).join(' ') || '',
+      imageUrl: ''
+    });
 
     return NextResponse.json(
       { message: "Account created successfully" },
