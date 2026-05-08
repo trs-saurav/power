@@ -23,12 +23,26 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
+    const [cartProducts, setCartProducts] = useState([])
 
-    const fetchProductData = async () => {
+    const [pagination, setPagination] = useState({
+        totalProducts: 0,
+        totalPages: 0,
+        currentPage: 1,
+        limit: 12
+    })
+
+    const fetchProductData = async (page = 1, limit = 12) => {
         try {
-            const { data } = await axios.get('/api/product/list')
+            const { data } = await axios.get(`/api/product/list?page=${page}&limit=${limit}`)
             if (data.success) {
                 setProducts(data.products)
+                setPagination({
+                    totalProducts: data.totalProducts,
+                    totalPages: data.totalPages,
+                    currentPage: data.currentPage,
+                    limit: limit
+                })
             } else {
                 toast.error(data.message)
             }
@@ -104,6 +118,22 @@ const fetchUserData = async () => {
 
     }
 
+    const fetchCartProducts = async () => {
+        const itemIds = Object.keys(cartItems).filter(id => cartItems[id] > 0);
+        if (itemIds.length === 0) {
+            setCartProducts([]);
+            return;
+        }
+        try {
+            const { data } = await axios.post('/api/product/cart-info', { itemIds });
+            if (data.success) {
+                setCartProducts(data.products);
+            }
+        } catch (error) {
+            console.error("Error fetching cart products:", error);
+        }
+    }
+
     const getCartCount = () => {
         let totalCount = 0;
         for (const items in cartItems) {
@@ -117,13 +147,19 @@ const fetchUserData = async () => {
     const getCartAmount = () => {
         let totalAmount = 0;
         for (const items in cartItems) {
-            let itemInfo = products.find((product) => product._id === items);
-            if (cartItems[items] > 0) {
+            let itemInfo = cartProducts.find((product) => product._id === items) || products.find((product) => product._id === items);
+            if (itemInfo && cartItems[items] > 0) {
                 totalAmount += itemInfo.offerPrice * cartItems[items];
             }
         }
         return Math.floor(totalAmount * 100) / 100;
     }
+
+    useEffect(() => {
+        if (Object.keys(cartItems).length > 0) {
+            fetchCartProducts();
+        }
+    }, [cartItems]);
 
     useEffect(() => {
         fetchProductData()
@@ -137,6 +173,8 @@ const fetchUserData = async () => {
     }, [user])
 
     const getToken = () => {
+        // Return user object or null - NextAuth handles session via cookies
+        // No need for Bearer token since APIs use session-based auth
         return user?.email || null;
     };
 
@@ -146,6 +184,7 @@ const fetchUserData = async () => {
         isSeller, setIsSeller,
         userData, fetchUserData,
         products, fetchProductData,
+        pagination, setPagination,
         cartItems, setCartItems,
         addToCart, updateCartQuantity,
         getCartCount, getCartAmount,

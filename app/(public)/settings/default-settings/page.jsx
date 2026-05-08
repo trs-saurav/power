@@ -51,7 +51,11 @@ export default function DefaultProfilePage() {
           headers: { Authorization: `Bearer ${token}` },
         }
       )
-      setDefaultSettings(settingsResponse.data.settings)
+      // Merge API response with default values to ensure all properties exist
+      setDefaultSettings((prevSettings) => ({
+        ...prevSettings,
+        ...settingsResponse.data.settings,
+      }))
     } catch (error) {
       console.error('Fetch error:', error)
       toast.error('Failed to load settings')
@@ -192,7 +196,7 @@ export default function DefaultProfilePage() {
             </div>
             <input
               type="checkbox"
-              checked={defaultSettings.notifyOnOrders}
+              checked={defaultSettings.notifyOnOrders ?? true}
               onChange={(e) =>
                 handleSettingChange('notifyOnOrders', e.target.checked)
               }
@@ -209,7 +213,7 @@ export default function DefaultProfilePage() {
             </div>
             <input
               type="checkbox"
-              checked={defaultSettings.notifyOnDelivery}
+              checked={defaultSettings.notifyOnDelivery ?? true}
               onChange={(e) =>
                 handleSettingChange('notifyOnDelivery', e.target.checked)
               }
@@ -226,7 +230,7 @@ export default function DefaultProfilePage() {
             </div>
             <input
               type="checkbox"
-              checked={defaultSettings.newsAndUpdates}
+              checked={defaultSettings.newsAndUpdates ?? false}
               onChange={(e) =>
                 handleSettingChange('newsAndUpdates', e.target.checked)
               }

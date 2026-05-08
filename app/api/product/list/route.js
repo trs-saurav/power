@@ -7,14 +7,31 @@ export async function GET(request) {
     // Auth (still protect the endpoint; only authorized sellers/admins can read)
 
 
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 12;
+    const skip = (page - 1) * limit;
+
     // DB
     await connectDB();
 
-    // Return ALL products (no filter)
-    const products = await Product.find({}).lean();
+    // Fetch products with pagination
+    const products = await Product.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalProducts = await Product.countDocuments({});
 
     return NextResponse.json(
-      { success: true, products },
+      { 
+        success: true, 
+        products, 
+        totalProducts,
+        totalPages: Math.ceil(totalProducts / limit),
+        currentPage: page
+      },
       { status: 200 }
     );
   } catch (error) {

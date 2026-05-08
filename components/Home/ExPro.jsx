@@ -63,9 +63,6 @@ const tiles = [
   { icon: Zap,    color: "#34d399", value: 10000, suffix: "+",  label: "Wiring Projects" },
   { icon: Camera, color: "#a78bfa", value: 1000,  suffix: "+",  label: "CCTV Installed" },
   { icon: Sun,    color: "#fbbf24", value: 500,   suffix: "+",  label: "Solar Projects" },
-  { icon: Shield, color: "#f472b6", value: 30,    suffix: " yr",label: "Warranty Support" },
-  { icon: Star,   color: "#fb923c", value: 365,   suffix: " d", label: "Annual Support" },
-  { icon: TrendingUp, color: "#4ade80", value: 100, suffix: "%",label: "Genuine Products" },
 ];
 
 export default function StatsShowcase() {
@@ -110,7 +107,7 @@ export default function StatsShowcase() {
         </motion.div>
 
         {/* Stat grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
           {tiles.map((t, i) => (
             <Tile key={i} {...t} active={inView} index={i} />
           ))}
@@ -123,7 +120,7 @@ export default function StatsShowcase() {
           animate={inView ? { opacity: 1 } : {}}
           transition={{ duration: 0.7, delay: 0.5 }}
         >
-          {["ISO Certified", "Authorized Dealer", "Industry Recognized", "Customer First"].map((t, i) => (
+          {[ "Authorized Dealer", "Industry Recognized", "Customer First"].map((t, i) => (
             <span key={i} className="px-5 py-2 rounded-full text-xs font-semibold text-white/70 tracking-wide"
               style={{ border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.05)" }}>
               {t}

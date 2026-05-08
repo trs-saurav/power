@@ -14,7 +14,7 @@ const slides = [
     cta2: { label: "Our Services",   href: "/services" },
   },
   {
-    image: "https://images.unsplash.com/photo-1615729947596-a598e5de0ab3?q=80&w=1920&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1920&auto=format&fit=crop",
     badge: "Clean & Renewable Energy",
     headline: "Go Solar,\nSave More",
     sub: "Cut electricity bills with premium solar installations from India's leading brands.",
@@ -22,7 +22,7 @@ const slides = [
     cta2: { label: "Learn More",      href: "/services" },
   },
   {
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=1920&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1920&auto=format&fit=crop",
     badge: "Professional Surveillance",
     headline: "Secure Every\nCorner",
     sub: "Expert CCTV installation with CP Plus and Dahua — 24/7 monitoring for homes and businesses.",
